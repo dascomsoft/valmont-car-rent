@@ -626,6 +626,7 @@
 
 
 
+
 'use client';
 
 import { motion } from 'framer-motion';
@@ -636,12 +637,15 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import DateSelector from '@/components/DateSelector';
 import { useBooking } from '@/context/BookingContext';
+import { getVehicles, getVehiclesAvailability } from '@/lib/actions';
 
 export default function PricingPage() {
-  const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedDate, setSelectedDate] = useState(() => {
     return new Date().toISOString().split('T')[0];
   });
+  const [vehicles, setVehicles] = useState([]);
+  const [unavailableMap, setUnavailableMap] = useState(new Map());
+  const [loading, setLoading] = useState(true);
   const { openBooking } = useBooking();
 
   useEffect(() => {
@@ -650,7 +654,25 @@ export default function PricingPage() {
       once: true,
       mirror: false
     });
-  }, []);
+    
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [vehiclesData, availabilityData] = await Promise.all([
+          getVehicles(),
+          getVehiclesAvailability(selectedDate)
+        ]);
+        setVehicles(vehiclesData);
+        setUnavailableMap(availabilityData);
+      } catch (error) {
+        console.error('Erreur chargement données:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [selectedDate]);
 
   const handleWhatsAppClick = (formule, details = '') => {
     const message = encodeURIComponent(
@@ -659,73 +681,59 @@ export default function PricingPage() {
     window.open(`https://wa.me/243811077897?text=${message}`, '_blank');
   };
 
-  // Fonction pour réserver un véhicule spécifique
   const handleBookVehicle = (vehicle) => {
     openBooking(vehicle);
   };
 
-  // Plans tarifaires basés sur l'image zuapub.jpg
-  const pricingPlans = [
-    {
-      categorie: 'SUV Luxe',
-      sousTitre: 'Confort et prestige pour vos déplacements',
-      offre: 'Offre spéciale collation',
-      prix: '155$ - 190$',
-      periode: 'USD/jour',
-      description: 'Véhicules haut de gamme pour un confort absolu',
-      vehicules: [
-        { id: 1, nom: 'Prado TXL', prix: 155, marque: 'Toyota', modele: 'Prado TXL', image: '/images/placeholder-car.jpg' },
-        { id: 2, nom: 'Prado TX', prix: 140, marque: 'Toyota', modele: 'Prado TX', image: '/images/placeholder-car.jpg' },
-        { id: 3, nom: 'Land Cruiser', prix: 190, marque: 'Toyota', modele: 'Land Cruiser', image: '/images/placeholder-car.jpg' }
-      ],
-      icon: '🚙',
-      avantages: ['Climatisation', 'Cuir', '7 places', 'Chauffeur inclus']
-    },
-    {
-      categorie: 'Famille & Groupe',
-      sousTitre: 'Pour vos sorties en famille',
-      offre: 'Offre spéciale collation',
-      prix: '95$ - 170$',
-      periode: 'USD/jour',
-      description: 'Espace et confort pour toute la famille',
-      vehicules: [
-        { id: 4, nom: 'Alphard', prix: 95, marque: 'Toyota', modele: 'Alphard', image: '/images/placeholder-car.jpg' },
-        { id: 5, nom: 'Noah', prix: 80, marque: 'Toyota', modele: 'Noah', image: '/images/placeholder-car.jpg' },
-        { id: 6, nom: 'Hiace', prix: 170, marque: 'Toyota', modele: 'Hiace', image: '/images/placeholder-car.jpg' }
-      ],
-      icon: '🚐',
-      avantages: ['8 places', 'Grand coffre', 'Climatisation', 'Écran DVD']
-    },
-    {
-      categorie: 'Berlines & Compactes',
-      sousTitre: 'Idéal pour la ville',
-      offre: 'Offre spéciale collation',
-      prix: '75$ - 120$',
-      periode: 'USD/jour',
-      description: 'Économiques et maniables pour vos trajets quotidiens',
-      vehicules: [
-        { id: 7, nom: 'Blade', prix: 80, marque: 'Toyota', modele: 'Blade', image: '/images/placeholder-car.jpg' },
-        { id: 8, nom: '100% CEE', prix: 120, marque: 'Toyota', modele: '100% CEE', image: '/images/placeholder-car.jpg' },
-        { id: 9, nom: 'Suzuki Swift', prix: 75, marque: 'Suzuki', modele: 'Swift', image: '/images/placeholder-car.jpg' }
-      ],
-      icon: '🚗',
-      avantages: ['Économique', 'Parking facile', 'Climatisation', 'Bluetooth']
-    }
-  ];
-
-  // Offres spéciales de l'image
-  const specialOffers = [
-    { vehicule: 'Prado TXL', prix: '155$', reduction: '-15%' },
-    { vehicule: 'Prado TX', prix: '140$', reduction: '-12%' },
-    { vehicule: 'Alphard', prix: '95$', reduction: '-20%' },
-    { vehicule: 'Blade', prix: '80$', reduction: '-10%' },
-    { vehicule: '100% CEE', prix: '120$', reduction: '-5%' },
-  ];
-
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0 }
+  // Regrouper les véhicules par catégorie
+  const getVehiclesByCategory = (category) => {
+    return vehicles.filter(v => v.categorie?.toLowerCase() === category.toLowerCase());
   };
+
+  // Calculer la fourchette de prix par catégorie
+  const getPriceRange = (category) => {
+    const categoryVehicles = getVehiclesByCategory(category);
+    if (categoryVehicles.length === 0) return '0$ - 0$';
+    const prices = categoryVehicles.map(v => v.prix);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    return `${min}$ - ${max}$`;
+  };
+
+  // Obtenir la disponibilité d'un véhicule
+  const getVehicleAvailability = (vehicleId) => {
+    const availability = unavailableMap.get(vehicleId);
+    return {
+      isAvailable: !availability,
+      returnDate: availability?.return_date || null
+    };
+  };
+
+  // Catégories disponibles
+  const categories = [...new Set(vehicles.map(v => v.categorie))].filter(Boolean);
+  
+  const categoryLabels = {
+    suv: { label: 'SUV Luxe', icon: '🚙', description: 'Confort et prestige pour vos déplacements' },
+    prestige: { label: 'Prestige & Luxe', icon: '✨', description: 'Véhicules haut de gamme pour vos occasions spéciales' },
+    classique: { label: 'Classique & Économique', icon: '🚗', description: 'Idéal pour vos trajets quotidiens en ville' }
+  };
+
+  const categoryAdvantages = {
+    suv: ['Climatisation', 'Cuir', '7 places', 'Chauffeur inclus'],
+    prestige: ['Cuir premium', 'Sièges chauffants', 'Sono BOSE', 'Chauffeur inclus'],
+    classique: ['Économique', 'Climatisation', 'Bluetooth', 'Chauffeur inclus']
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-black to-gray-900 text-white pt-16 sm:pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+          <p className="text-gray-400">Chargement des tarifs...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-black to-gray-900 text-white pt-16 sm:pt-20">
@@ -734,7 +742,7 @@ export default function PricingPage() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/carjordyno11.jpg"
-            alt="Zua Car Tarifs - Offre spéciale"
+            alt="Zua Car Tarifs"
             fill
             className="object-cover opacity-30"
             priority
@@ -786,13 +794,13 @@ export default function PricingPage() {
             
             <div className="flex flex-wrap gap-2 sm:gap-3 justify-center px-4">
               <span className="bg-yellow-400/10 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm border border-yellow-400/30 text-yellow-400">
-                ✅ Sans frais cachés
+                Sans frais cachés
               </span>
               <span className="bg-yellow-400/10 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm border border-yellow-400/30 text-yellow-400">
-                🔒 Paiement sécurisé
+                Paiement sécurisé
               </span>
               <span className="bg-yellow-400/10 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm border border-yellow-400/30 text-yellow-400">
-                ⚡ Réservation express
+                Réservation express
               </span>
             </div>
           </motion.div>
@@ -817,12 +825,12 @@ export default function PricingPage() {
             <div className="flex items-center gap-2 sm:gap-3">
               <span className="text-2xl sm:text-3xl">🎁</span>
               <div>
-                <h3 className="text-base sm:text-lg md:text-xl font-bold">Offre spéciale collation</h3>
-                <p className="text-xs sm:text-sm opacity-90">Profitez d'une réduction sur nos véhicules familiaux</p>
+                <h3 className="text-base sm:text-lg md:text-xl font-bold">Offre spéciale</h3>
+                <p className="text-xs sm:text-sm opacity-90">Profitez de nos tarifs compétitifs</p>
               </div>
             </div>
             <button
-              onClick={() => handleWhatsAppClick("l'offre spéciale collation")}
+              onClick={() => handleWhatsAppClick("l'offre spéciale")}
               className="bg-gray-900 hover:bg-black text-yellow-400 px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 hover:scale-105 whitespace-nowrap"
             >
               En profiter →
@@ -853,144 +861,121 @@ export default function PricingPage() {
             Des prix transparents en USD
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-gray-400">
-            Tous nos tarifs incluent le chauffeur professionnel. Paiement en USD ou en Francs congolais au taux du jour.
+            Tous nos tarifs incluent le chauffeur professionnel.
           </p>
         </motion.div>
 
-        {/* Grille des tarifs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-2 sm:px-0">
-          {pricingPlans.map((plan, index) => (
-            <motion.div
-              key={plan.categorie}
-              variants={fadeInUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -10 }}
-              className="group relative bg-gray-800/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl hover:shadow-yellow-400/10 transition-all duration-500 border border-gray-700"
-            >
-              <div className="h-1.5 sm:h-2 w-full bg-gradient-to-r from-yellow-400 to-yellow-600"></div>
-
-              <div className="absolute top-4 right-4 z-10">
-                <span className="bg-yellow-400 text-gray-900 text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full">
-                  {plan.offre}
-                </span>
-              </div>
-
-              <div className="p-5 sm:p-6 md:p-8">
-                <div className="flex justify-between items-start mb-4 sm:mb-6">
-                  <div>
-                    <span className="text-3xl sm:text-4xl md:text-5xl mb-1 sm:mb-2 block">{plan.icon}</span>
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white">{plan.categorie}</h3>
-                    <p className="text-xs sm:text-sm text-gray-400">{plan.sousTitre}</p>
-                  </div>
-                </div>
-
-                <div className="mb-4 sm:mb-6">
-                  <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-yellow-400">{plan.prix}</span>
-                  <span className="text-xs sm:text-sm text-gray-400"> /jour</span>
-                </div>
-
-                <p className="text-xs sm:text-sm md:text-base text-gray-300 mb-4 sm:mb-6">{plan.description}</p>
-
-                <div className="mb-4 sm:mb-6">
-                  <h4 className="font-semibold text-sm sm:text-base text-white mb-2 sm:mb-3">Avantages :</h4>
-                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                    {plan.avantages.map((avantage, i) => (
-                      <span key={i} className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
-                        {avantage}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Véhicules avec bouton Réserver */}
-                <div className="mb-6 sm:mb-8">
-                  <h4 className="font-semibold text-sm sm:text-base text-white mb-2 sm:mb-3">Véhicules disponibles :</h4>
-                  <div className="space-y-2 sm:space-y-3">
-                    {plan.vehicules.map((v, i) => (
-                      <div key={i} className="flex items-center justify-between gap-2 sm:gap-3 p-2 bg-gray-700/50 rounded-lg">
-                        <div className="flex items-center gap-2 sm:gap-3 flex-1">
-                          <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-lg overflow-hidden bg-gray-600 flex-shrink-0">
-                            <div className="absolute inset-0 flex items-center justify-center text-yellow-400 text-xs">
-                              🚗
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-xs sm:text-sm text-white block">{v.nom}</span>
-                            <span className="text-yellow-400 font-bold text-xs">{v.prix}$/jour</span>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleBookVehicle(v)}
-                          className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-all duration-300 text-xs sm:text-sm"
-                        >
-                          Réserver
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleWhatsAppClick(plan.categorie, `Je suis intéressé par la catégorie ${plan.categorie}`)}
-                  className="w-full py-3 sm:py-4 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771z"/>
-                  </svg>
-                  Contacter l'agence
-                </motion.button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Tableau des offres spéciales */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-12 sm:mt-16 bg-gray-800/50 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-yellow-400/20"
-        >
-          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 sm:mb-6 text-center">
-            Offres spéciales du moment
-          </h3>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-yellow-400/20">
-                  <th className="py-3 text-left text-xs sm:text-sm font-semibold text-yellow-400">Véhicule</th>
-                  <th className="py-3 text-center text-xs sm:text-sm font-semibold text-yellow-400">Prix</th>
-                  <th className="py-3 text-right text-xs sm:text-sm font-semibold text-yellow-400">Action</th>
-                 </tr>
-              </thead>
-              <tbody>
-                {specialOffers.map((offer, index) => (
-                  <tr key={index} className="border-b border-gray-700 hover:bg-gray-700/30 transition">
-                    <td className="py-3 text-left text-xs sm:text-sm text-white">{offer.vehicule}</td>
-                    <td className="py-3 text-center">
-                      <span className="text-yellow-400 font-bold text-xs sm:text-sm">{offer.prix}</span>
-                      <span className="ml-2 text-green-400 text-[10px] sm:text-xs">{offer.reduction}</span>
-                    </td>
-                    <td className="py-3 text-right">
-                      <button
-                        onClick={() => handleWhatsAppClick(offer.vehicule)}
-                        className="text-yellow-400 hover:text-yellow-500 text-xs sm:text-sm font-semibold"
-                      >
-                        Réserver →
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Grille des tarifs par catégorie */}
+        {categories.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-400">Aucun véhicule disponible pour le moment.</p>
           </div>
-        </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-2 sm:px-0">
+            {categories.map((category, index) => {
+              const categoryVehicles = getVehiclesByCategory(category);
+              const priceRange = getPriceRange(category);
+              const catInfo = categoryLabels[category.toLowerCase()] || { label: category, icon: '🚙', description: '' };
+              const advantages = categoryAdvantages[category.toLowerCase()] || ['Climatisation', 'Chauffeur inclus'];
+              
+              return (
+                <motion.div
+                  key={category}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -10 }}
+                  className="group relative bg-gray-800/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl hover:shadow-yellow-400/10 transition-all duration-500 border border-gray-700"
+                >
+                  <div className="h-1.5 sm:h-2 w-full bg-gradient-to-r from-yellow-400 to-yellow-600"></div>
+
+                  <div className="absolute top-4 right-4 z-10">
+                    <span className="bg-yellow-400 text-gray-900 text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full">
+                      {categoryVehicles.length} véhicules
+                    </span>
+                  </div>
+
+                  <div className="p-5 sm:p-6 md:p-8">
+                    <div className="flex justify-between items-start mb-4 sm:mb-6">
+                      <div>
+                        <span className="text-3xl sm:text-4xl md:text-5xl mb-1 sm:mb-2 block">{catInfo.icon}</span>
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white">{catInfo.label}</h3>
+                        <p className="text-xs sm:text-sm text-gray-400">{catInfo.description}</p>
+                      </div>
+                    </div>
+
+                    <div className="mb-4 sm:mb-6">
+                      <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-yellow-400">{priceRange}</span>
+                      <span className="text-xs sm:text-sm text-gray-400"> /jour</span>
+                    </div>
+
+                    <div className="mb-4 sm:mb-6">
+                      <h4 className="font-semibold text-sm sm:text-base text-white mb-2 sm:mb-3">Avantages :</h4>
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                        {advantages.map((avantage, i) => (
+                          <span key={i} className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
+                            {avantage}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Véhicules disponibles */}
+                    <div className="mb-6 sm:mb-8">
+                      <h4 className="font-semibold text-sm sm:text-base text-white mb-2 sm:mb-3">Véhicules disponibles :</h4>
+                      <div className="space-y-2 sm:space-y-3">
+                        {categoryVehicles.slice(0, 4).map((vehicle) => {
+                          const { isAvailable, returnDate } = getVehicleAvailability(vehicle.id);
+                          return (
+                            <div key={vehicle.id} className="flex items-center justify-between gap-2 sm:gap-3 p-2 bg-gray-700/50 rounded-lg">
+                              <div className="flex items-center gap-2 sm:gap-3 flex-1">
+                                <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-lg overflow-hidden bg-gray-600 flex-shrink-0">
+                                  <div className="absolute inset-0 flex items-center justify-center text-yellow-400 text-xs">
+                                    🚗
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="text-xs sm:text-sm text-white block">
+                                    {vehicle.marque} {vehicle.modele}
+                                  </span>
+                                  <span className="text-yellow-400 font-bold text-xs">{vehicle.prix}$/jour</span>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleBookVehicle(vehicle)}
+                                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-all duration-300 text-xs sm:text-sm"
+                              >
+                                Réserver
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {categoryVehicles.length > 4 && (
+                        <Link href="/fleet" className="block text-center text-xs text-yellow-400 mt-2 hover:underline">
+                          + {categoryVehicles.length - 4} autres véhicules
+                        </Link>
+                      )}
+                    </div>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleWhatsAppClick(catInfo.label)}
+                      className="w-full py-3 sm:py-4 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
+                    >
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771z"/>
+                      </svg>
+                      Contacter l'agence
+                    </motion.button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Informations importantes */}
         <motion.div
@@ -1008,7 +993,6 @@ export default function PricingPage() {
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-400/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
               <div>
@@ -1020,7 +1004,7 @@ export default function PricingPage() {
             <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-700/50 rounded-lg sm:rounded-xl">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-400/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2" />
                 </svg>
               </div>
               <div>
@@ -1032,7 +1016,7 @@ export default function PricingPage() {
             <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-700/50 rounded-lg sm:rounded-xl">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-400/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0" />
                 </svg>
               </div>
               <div>
@@ -1044,7 +1028,7 @@ export default function PricingPage() {
             <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-700/50 rounded-lg sm:rounded-xl">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-400/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2 4 4 6-6 4 4M3 12v6h18v-6" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2 4 4 6-6 4 4" />
                 </svg>
               </div>
               <div>
@@ -1098,3 +1082,128 @@ export default function PricingPage() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -3,8 +3,35 @@
 import { useState, useEffect } from 'react';
 import { FaCalendarAlt } from 'react-icons/fa';
 
-export default function DateSelector({ onDateChange, selectedDate }) {
-  const [localDate, setLocalDate] = useState(selectedDate);
+export default function DateSelector({ onDateChange, selectedDate: initialDate }) {
+  // ✅ FORCER la date du jour indépendamment de la prop
+  const getToday = () => new Date().toISOString().split('T')[0];
+  const today = getToday();
+  
+  // ✅ Ignorer initialDate si elle est invalide ou dans le futur lointain
+  const isValidDate = (date) => {
+    if (!date) return false;
+    const dateObj = new Date(date);
+    const year = dateObj.getFullYear();
+    return year <= new Date().getFullYear() + 1 && year >= 2020;
+  };
+  
+  const defaultDate = (isValidDate(initialDate) && initialDate <= today) ? initialDate : today;
+  const [localDate, setLocalDate] = useState(defaultDate);
+
+  // ✅ Synchroniser avec le parent uniquement si la date est valide
+  useEffect(() => {
+    if (initialDate && isValidDate(initialDate) && initialDate !== localDate) {
+      setLocalDate(initialDate);
+    }
+  }, [initialDate]);
+
+  // ✅ Forcer l'envoi de la date du jour au parent au montage
+  useEffect(() => {
+    if (onDateChange && localDate) {
+      onDateChange(localDate);
+    }
+  }, []);
 
   const handleDateChange = (e) => {
     const newDate = e.target.value;
@@ -13,9 +40,9 @@ export default function DateSelector({ onDateChange, selectedDate }) {
   };
 
   const resetToToday = () => {
-    const today = new Date().toISOString().split('T')[0];
-    setLocalDate(today);
-    onDateChange(today);
+    const todayDate = getToday();
+    setLocalDate(todayDate);
+    onDateChange(todayDate);
   };
 
   return (
@@ -30,7 +57,7 @@ export default function DateSelector({ onDateChange, selectedDate }) {
           type="date"
           value={localDate}
           onChange={handleDateChange}
-          min={new Date().toISOString().split('T')[0]}
+          min={today}
           className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-yellow-400 focus:outline-none transition"
         />
         
