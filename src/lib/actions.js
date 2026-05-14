@@ -1,30 +1,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // // Server Actions pour les opérations CRUD
 // 'use server';
 
@@ -246,7 +222,7 @@
 //   }
 // }
 
-// // Créer une réservation
+// // Créer une réservation (SANS EMAIL - envoyé côté client)
 // export async function createReservation(formData) {
 //   try {
 //     const vehicleId = parseInt(formData.get('vehicle_id'));
@@ -333,12 +309,22 @@
 //       notes: notes,
 //     });
 
-//     // Envoyer l'email de confirmation (non bloquant)
-//     try {
-//       const { sendBookingConfirmation } = await import('./email.js');
-//       await sendBookingConfirmation({
-//         customerEmail,
+//     // ⚠️ L'EMAIL DE CONFIRMATION EST ENVOYÉ PAR BookingModalGlobal.jsx (CÔTÉ CLIENT)
+//     // On ne l'envoie PAS ici pour éviter l'erreur "location is not defined"
+
+//     revalidatePath('/');
+//     revalidatePath('/fleet');
+//     revalidatePath('/admin/dashboard');
+//     revalidateTag('reservations');
+
+//     // Retourner les détails pour l'email côté client
+//     return {
+//       success: true,
+//       message: 'Réservation créée avec succès ! Un email de confirmation vous a été envoyé.',
+//       reservation: {
+//         id: null, // L'ID sera généré
 //         customerName,
+//         customerEmail,
 //         customerPhone,
 //         vehicle: selectedVehicle,
 //         pickupDate,
@@ -346,19 +332,7 @@
 //         totalPrice,
 //         pickupLocation,
 //         dropoffLocation,
-//       });
-//     } catch (emailError) {
-//       console.log('Email non envoyé mais réservation OK:', emailError.message);
-//     }
-
-//     revalidatePath('/');
-//     revalidatePath('/fleet');
-//     revalidatePath('/admin/dashboard');
-//     revalidateTag('reservations');
-
-//     return {
-//       success: true,
-//       message: 'Réservation créée avec succès ! Un email de confirmation vous a été envoyé.',
+//       }
 //     };
 //   } catch (error) {
 //     console.error('Erreur lors de la création de la réservation:', error);
@@ -369,7 +343,7 @@
 //   }
 // }
 
-// // Mettre à jour le statut d'une réservation (SANS EMAIL - l'email est envoyé côté client)
+// // Mettre à jour le statut d'une réservation (SANS EMAIL - envoyé côté client)
 // export async function updateReservationStatus(reservationId, newStatus) {
 //   await checkAdmin();
 
@@ -382,7 +356,6 @@
 //     revalidatePath('/admin/dashboard');
 //     revalidateTag('reservations');
 
-//     // Retourner les infos nécessaires
 //     return { 
 //       success: true, 
 //       message: 'Statut mis à jour',
@@ -394,12 +367,6 @@
 //     return { success: false, message: 'Erreur lors de la mise à jour' };
 //   }
 // }
-
-
-
-
-
-
 
 // // Supprimer une réservation
 // export async function deleteReservation(reservationId) {
@@ -514,62 +481,19 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Server Actions pour les opérations CRUD
 'use server';
 
 import { db } from './db.js';
 import { vehicles, reservations } from './schema.js';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and, ne, or } from 'drizzle-orm';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+
+// =========================
+// FONCTIONS ADMIN
+// =========================
 
 async function checkAdmin() {
   const cookieStore = await cookies();
@@ -747,42 +671,118 @@ export async function getReservationsByVehicle(vehicleId) {
   }
 }
 
-// Vérifier la disponibilité d'un véhicule
-export async function checkVehicleAvailability(
-  vehicleId,
-  pickupDate,
-  returnDate
-) {
+// =========================
+// VÉRIFICATION DISPONIBILITÉ - VERSION AVANCÉE
+// =========================
+
+/**
+ * Vérifie la disponibilité d'un véhicule pour une période donnée
+ * @param {number} vehicleId - ID du véhicule
+ * @param {string} pickupDate - Date de début (YYYY-MM-DD)
+ * @param {string} returnDate - Date de fin (YYYY-MM-DD)
+ * @returns {Promise<boolean>} - true si disponible, false si occupé
+ */
+export async function checkVehicleAvailability(vehicleId, pickupDate, returnDate) {
   try {
-    const existingReservations = await db
+    // Récupérer les réservations actives (pending ou confirmed)
+    const activeReservations = await db
       .select()
       .from(reservations)
-      .where(eq(reservations.vehicle_id, vehicleId));
+      .where(
+        and(
+          eq(reservations.vehicle_id, vehicleId),
+          or(
+            eq(reservations.status, 'pending'),
+            eq(reservations.status, 'confirmed')
+          )
+        )
+      );
 
     const requestedPickup = new Date(pickupDate);
     const requestedReturn = new Date(returnDate);
 
-    const hasConflict = existingReservations.some((reservation) => {
-      // Ignorer les réservations annulées
-      if (reservation.status === 'cancelled') return false;
-      
+    const hasConflict = activeReservations.some((reservation) => {
       const existingPickup = new Date(reservation.pickup_date);
       const existingReturn = new Date(reservation.return_date);
 
+      // Vérifier le chevauchement des périodes
       return (
         requestedPickup <= existingReturn &&
         requestedReturn >= existingPickup
       );
     });
 
-    return !hasConflict;
+    return !hasConflict; // true = disponible, false = conflit
   } catch (error) {
     console.error('Erreur lors de la vérification de disponibilité:', error);
     return false;
   }
 }
 
-// Créer une réservation (SANS EMAIL - envoyé côté client)
+/**
+ * Vérifie si un véhicule est disponible à une date spécifique (pour les badges)
+ * @param {number} vehicleId - ID du véhicule
+ * @param {string} dateStr - Date au format YYYY-MM-DD
+ * @returns {Promise<boolean>} - true si disponible, false si occupé
+ */
+export async function checkVehicleAvailabilityByDate(vehicleId, dateStr) {
+  try {
+    // Récupérer les réservations actives (pending ou confirmed)
+    const activeReservations = await db
+      .select()
+      .from(reservations)
+      .where(
+        and(
+          eq(reservations.vehicle_id, vehicleId),
+          or(
+            eq(reservations.status, 'pending'),
+            eq(reservations.status, 'confirmed')
+          )
+        )
+      );
+
+    // Vérifier si la date cible tombe dans une période de réservation
+    const isBooked = activeReservations.some((reservation) => {
+      const pickupDate = reservation.pickup_date;
+      const returnDate = reservation.return_date;
+      
+      return dateStr >= pickupDate && dateStr <= returnDate;
+    });
+
+    return !isBooked; // true = disponible, false = occupé
+  } catch (error) {
+    console.error('Erreur lors de la vérification de disponibilité:', error);
+    return true; // Par défaut, considérer disponible
+  }
+}
+
+/**
+ * Vérifie la disponibilité de plusieurs véhicules pour une date donnée
+ * @param {Array} vehiclesList - Liste des véhicules
+ * @param {string} dateStr - Date au format YYYY-MM-DD
+ * @returns {Promise<Object>} - Mapping vehicleId -> disponibilité
+ */
+export async function checkMultipleVehiclesAvailability(vehiclesList, dateStr) {
+  try {
+    const availabilityMap = {};
+    
+    for (const vehicle of vehiclesList) {
+      const isAvailable = await checkVehicleAvailabilityByDate(vehicle.id, dateStr);
+      availabilityMap[vehicle.id] = isAvailable;
+    }
+    
+    return availabilityMap;
+  } catch (error) {
+    console.error('Erreur lors de la vérification multiple:', error);
+    return {};
+  }
+}
+
+// =========================
+// CRÉATION RÉSERVATION
+// =========================
+
+// Créer une réservation
 export async function createReservation(formData) {
   try {
     const vehicleId = parseInt(formData.get('vehicle_id'));
@@ -830,7 +830,7 @@ export async function createReservation(formData) {
 
     const selectedVehicle = vehicle[0];
 
-    // Vérifier la disponibilité
+    // Vérifier la disponibilité (anti-double booking)
     const isAvailable = await checkVehicleAvailability(
       vehicleId,
       pickupDate,
@@ -869,20 +869,15 @@ export async function createReservation(formData) {
       notes: notes,
     });
 
-    // ⚠️ L'EMAIL DE CONFIRMATION EST ENVOYÉ PAR BookingModalGlobal.jsx (CÔTÉ CLIENT)
-    // On ne l'envoie PAS ici pour éviter l'erreur "location is not defined"
-
     revalidatePath('/');
     revalidatePath('/fleet');
     revalidatePath('/admin/dashboard');
     revalidateTag('reservations');
 
-    // Retourner les détails pour l'email côté client
     return {
       success: true,
       message: 'Réservation créée avec succès ! Un email de confirmation vous a été envoyé.',
       reservation: {
-        id: null, // L'ID sera généré
         customerName,
         customerEmail,
         customerPhone,
@@ -903,11 +898,28 @@ export async function createReservation(formData) {
   }
 }
 
-// Mettre à jour le statut d'une réservation (SANS EMAIL - envoyé côté client)
+// =========================
+// GESTION STATUT RÉSERVATION
+// =========================
+
+// Mettre à jour le statut d'une réservation
 export async function updateReservationStatus(reservationId, newStatus) {
   await checkAdmin();
 
   try {
+    // Récupérer les détails de la réservation avant modification
+    const reservationResult = await db
+      .select()
+      .from(reservations)
+      .where(eq(reservations.id, reservationId));
+    
+    if (!reservationResult.length) {
+      return { success: false, message: 'Réservation non trouvée' };
+    }
+    
+    const reservation = reservationResult[0];
+    
+    // Mettre à jour le statut
     await db
       .update(reservations)
       .set({ status: newStatus })
@@ -916,11 +928,19 @@ export async function updateReservationStatus(reservationId, newStatus) {
     revalidatePath('/admin/dashboard');
     revalidateTag('reservations');
 
+    // Retourner les informations pour l'email (côté client)
     return { 
       success: true, 
       message: 'Statut mis à jour',
       status: newStatus,
-      reservationId
+      reservationId,
+      reservation: {
+        customerEmail: reservation.customer_email,
+        customerName: reservation.customer_name,
+        pickupDate: reservation.pickup_date,
+        returnDate: reservation.return_date,
+        totalPrice: reservation.total_price,
+      }
     };
   } catch (error) {
     console.error('Erreur lors de la mise à jour du statut:', error);
@@ -944,6 +964,47 @@ export async function deleteReservation(reservationId) {
   } catch (error) {
     console.error('Erreur lors de la suppression:', error);
     return { success: false, message: 'Erreur lors de la suppression' };
+  }
+}
+
+// =========================
+// STATISTIQUES
+// =========================
+
+/**
+ * Récupère les statistiques pour le dashboard admin
+ */
+export async function getDashboardStats() {
+  await checkAdmin();
+
+  try {
+    const allReservations = await db.select().from(reservations);
+    const allVehicles = await db.select().from(vehicles);
+    
+    const pendingReservations = allReservations.filter(r => r.status === 'pending').length;
+    const confirmedReservations = allReservations.filter(r => r.status === 'confirmed').length;
+    const cancelledReservations = allReservations.filter(r => r.status === 'cancelled').length;
+    const completedReservations = allReservations.filter(r => r.status === 'completed').length;
+    
+    const totalRevenue = allReservations
+      .filter(r => r.status === 'confirmed' || r.status === 'completed')
+      .reduce((sum, r) => sum + (r.total_price || 0), 0);
+    
+    return {
+      success: true,
+      stats: {
+        totalVehicles: allVehicles.length,
+        totalReservations: allReservations.length,
+        pendingReservations,
+        confirmedReservations,
+        cancelledReservations,
+        completedReservations,
+        totalRevenue,
+      }
+    };
+  } catch (error) {
+    console.error('Erreur lors de la récupération des statistiques:', error);
+    return { success: false, stats: null };
   }
 }
 
