@@ -12,8 +12,7 @@ import {
 } from 'react-icons/fa';
 import { useBooking } from '@/context/BookingContext';
 import { createReservation } from '@/lib/actions';
-import { sendBookingConfirmation } from '@/lib/email'; // ← IMPORTANT
-
+// import { sendFinalConfirmationEmail as sendBookingConfirmation } from '@/lib/email-nodemailer.js';
 export default function BookingModalGlobal() {
   const booking = useBooking();
   

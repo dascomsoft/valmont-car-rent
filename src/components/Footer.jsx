@@ -1,19 +1,32 @@
-// Pied de page
+// Footer - Valmont Car Rent Seychelles
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Footer() {
   return (
     <footer className="bg-gradient-to-b from-gray-900 to-black text-white border-t border-yellow-400/20">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* À propos */}
+          {/* About */}
           <div>
-            <h3 className="text-xl font-bold mb-4">
-              <span className="text-white">Zua</span>
-              <span className="text-yellow-400">Car</span>
-            </h3>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="relative w-12 h-12 overflow-hidden rounded-full border-2 border-yellow-400/50">
+                <Image
+                  src="/images/valmontlogo.png"
+                  alt="Valmont Car Rent Logo"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold">
+                  <span className="text-white">Valmont</span>
+                  <span className="text-yellow-400">Car Rent</span>
+                </h3>
+              </div>
+            </div>
             <p className="text-gray-400 mb-4">
-              Vente & location, votre compagnon de route pour toutes vos activités à Kinshasa.
+              Your trusted car rental partner in Seychelles. Explore Mahé, Praslin, and La Digue with our premium fleet.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-yellow-400 transition">
@@ -34,23 +47,23 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Liens rapides */}
+          {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-yellow-400">Liens rapides</h3>
+            <h3 className="text-lg font-semibold mb-4 text-yellow-400">Quick Links</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/" className="text-gray-400 hover:text-yellow-400 transition">
-                  Accueil
+                  Home
                 </Link>
               </li>
               <li>
                 <Link href="/fleet" className="text-gray-400 hover:text-yellow-400 transition">
-                  Notre flotte
+                  Our Fleet
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="text-gray-400 hover:text-yellow-400 transition">
-                  Tarifs
+                <Link href="/booking/cars" className="text-gray-400 hover:text-yellow-400 transition">
+                  Book Now
                 </Link>
               </li>
             </ul>
@@ -65,15 +78,15 @@ export default function Footer() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span>Gombe – Avenue Lokele 02, près de la Gare Centrale, Kinshasa</span>
+                <span>Mahé, Seychelles</span>
               </li>
               <li className="flex items-start gap-2">
                 <svg className="w-5 h-5 mt-1 flex-shrink-0 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
                 <span>
-                  <a href="https://wa.me/243811077897" className="hover:text-yellow-400 transition">
-                    +243 811 077 897
+                  <a href="https://wa.me/2481234567" className="hover:text-yellow-400 transition">
+                    +248 123 4567
                   </a>
                 </span>
               </li>
@@ -81,33 +94,33 @@ export default function Footer() {
                 <svg className="w-5 h-5 mt-1 flex-shrink-0 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <a href="mailto:zuacar070@gmail.com" className="hover:text-yellow-400 transition">
-                  contact@zuacar.com
+                <a href="mailto:contact@valmontcarrent.com" className="hover:text-yellow-400 transition">
+                  contact@valmontcarrent.com
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Horaires & WhatsApp */}
+          {/* Hours & WhatsApp */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-yellow-400">Horaires</h3>
+            <h3 className="text-lg font-semibold mb-4 text-yellow-400">Opening Hours</h3>
             <ul className="space-y-2 text-gray-400">
               <li className="flex items-start gap-2">
                 <svg className="w-5 h-5 mt-1 flex-shrink-0 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>Lundi - Samedi: 7h - 20h</span>
+                <span>Monday - Saturday: 7:00 - 20:00</span>
               </li>
               <li className="flex items-start gap-2">
                 <svg className="w-5 h-5 mt-1 flex-shrink-0 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
-                <span>Dimanche: Sur rendez-vous</span>
+                <span>Sunday: By appointment</span>
               </li>
               <li className="pt-4">
                 <a
-                  href="https://wa.me/243811077897"
+                  href="https://wa.me/2481234567"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105"
@@ -115,24 +128,25 @@ export default function Footer() {
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771z"/>
                   </svg>
-                  Réserver sur WhatsApp
+                  Book on WhatsApp
                 </a>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Badge de localisation */}
+        {/* Location Badge */}
         <div className="flex justify-center mt-8">
           <span className="inline-flex items-center gap-2 bg-yellow-400/10 text-yellow-400 px-3 py-1 rounded-full text-xs border border-yellow-400/20">
             <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse"></span>
-            🇨🇩 Kinshasa, République Démocratique du Congo
+            🇸🇨 Mahé, Seychelles - Serving all islands
           </span>
         </div>
 
+        {/* Copyright */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Zua Car. Tous droits réservés.</p>
-          <p className="text-xs mt-2">Vente & location de véhicules avec chauffeur à Kinshasa</p>
+          <p>&copy; {new Date().getFullYear()} Valmont Car Rent Seychelles. All rights reserved.</p>
+          <p className="text-xs mt-2">Premium car rental service in Seychelles • Explore paradise with confidence</p>
         </div>
       </div>
     </footer>

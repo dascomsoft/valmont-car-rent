@@ -1,1699 +1,32 @@
-
-
-
-// // // Server Actions pour les opérations CRUD
-// // 'use server';
-
-// // import { db } from './db.js';
-// // import { vehicles, reservations } from './schema.js';
-// // import { eq, desc } from 'drizzle-orm';
-// // import { revalidatePath, revalidateTag } from 'next/cache';
-// // import { cookies } from 'next/headers';
-// // import { redirect } from 'next/navigation';
-
-// // async function checkAdmin() {
-// //   const cookieStore = await cookies();
-// //   const isAdmin = cookieStore.get('admin_session');
-// //   if (!isAdmin || isAdmin.value !== 'authenticated') {
-// //     redirect('/admin/login');
-// //   }
-// // }
-
-// // // =========================
-// // // VEHICLES CRUD
-// // // =========================
-
-// // // Récupérer tous les véhicules
-// // export async function getVehicles() {
-// //   try {
-// //     return await db.select().from(vehicles);
-// //   } catch (error) {
-// //     console.error('Erreur:', error);
-// //     return [];
-// //   }
-// // }
-
-// // // Récupérer les véhicules en vedette
-// // export async function getFeaturedVehicles() {
-// //   try {
-// //     return await db.select().from(vehicles).limit(3);
-// //   } catch (error) {
-// //     console.error('Erreur:', error);
-// //     return [];
-// //   }
-// // }
-
-// // // Ajouter un véhicule
-// // export async function addVehicle(formData) {
-// //   await checkAdmin();
-  
-// //   try {
-// //     const marque = formData.get('marque');
-// //     const modele = formData.get('modele');
-// //     const prix = parseInt(formData.get('prix'));
-// //     const description = formData.get('description');
-// //     const categorie = formData.get('categorie') || 'classique';
-    
-// //     let imageData = null;
-// //     let imageUrl = null;
-    
-// //     const imageFile = formData.get('imageFile');
-// //     const imageUrlInput = formData.get('imageUrl');
-    
-// //     if (imageFile && imageFile.size > 0) {
-// //       const bytes = await imageFile.arrayBuffer();
-// //       const buffer = Buffer.from(bytes);
-// //       const base64 = buffer.toString('base64');
-// //       imageData = `data:${imageFile.type};base64,${base64}`;
-// //     } else if (imageUrlInput && imageUrlInput.trim() !== '') {
-// //       imageUrl = imageUrlInput;
-// //     } else {
-// //       imageUrl = '/images/placeholder-car.jpg';
-// //     }
-
-// //     const newVehicle = {
-// //       marque,
-// //       modele,
-// //       prix,
-// //       description,
-// //       categorie,
-// //       image_data: imageData,
-// //       image_url: imageUrl,
-// //     };
-
-// //     await db.insert(vehicles).values(newVehicle);
-// //     revalidatePath('/fleet');
-// //     revalidatePath('/admin/dashboard');
-// //     return { success: true, message: 'Véhicule ajouté avec succès' };
-// //   } catch (error) {
-// //     console.error('Erreur:', error);
-// //     return { success: false, message: error.message };
-// //   }
-// // }
-
-// // // Mettre à jour un véhicule
-// // export async function updateVehicle(id, formData) {
-// //   await checkAdmin();
-
-// //   try {
-// //     const updatedVehicle = {};
-    
-// //     const marque = formData.get('marque');
-// //     const modele = formData.get('modele');
-// //     const prix = formData.get('prix');
-// //     const description = formData.get('description');
-// //     const categorie = formData.get('categorie');
-    
-// //     if (marque) updatedVehicle.marque = marque;
-// //     if (modele) updatedVehicle.modele = modele;
-// //     if (prix) updatedVehicle.prix = parseInt(prix);
-// //     if (description) updatedVehicle.description = description;
-// //     if (categorie) updatedVehicle.categorie = categorie;
-    
-// //     const imageFile = formData.get('imageFile');
-// //     const imageUrlInput = formData.get('imageUrl');
-    
-// //     if (imageFile && imageFile.size > 0) {
-// //       const bytes = await imageFile.arrayBuffer();
-// //       const buffer = Buffer.from(bytes);
-// //       const base64 = buffer.toString('base64');
-// //       updatedVehicle.image_data = `data:${imageFile.type};base64,${base64}`;
-// //     } else if (imageUrlInput && imageUrlInput.trim() !== '') {
-// //       updatedVehicle.image_url = imageUrlInput;
-// //     }
-
-// //     if (Object.keys(updatedVehicle).length === 0) {
-// //       return { success: false, message: 'Aucune modification' };
-// //     }
-
-// //     await db.update(vehicles).set(updatedVehicle).where(eq(vehicles.id, id));
-// //     revalidatePath('/fleet');
-// //     revalidatePath('/admin/dashboard');
-// //     return { success: true, message: 'Véhicule modifié avec succès' };
-// //   } catch (error) {
-// //     console.error('Erreur:', error);
-// //     return { success: false, message: error.message };
-// //   }
-// // }
-
-// // // Supprimer un véhicule
-// // export async function deleteVehicle(id) {
-// //   await checkAdmin();
-
-// //   try {
-// //     await db.delete(vehicles).where(eq(vehicles.id, id));
-// //     revalidatePath('/fleet');
-// //     revalidatePath('/admin/dashboard');
-// //     return { success: true, message: 'Véhicule supprimé avec succès' };
-// //   } catch (error) {
-// //     console.error('Erreur:', error);
-// //     return { success: false, message: error.message };
-// //   }
-// // }
-
-// // // =========================
-// // // RESERVATIONS CRUD
-// // // =========================
-
-// // // Récupérer toutes les réservations
-// // export async function getReservations() {
-// //   await checkAdmin();
-
-// //   try {
-// //     const allReservations = await db
-// //       .select()
-// //       .from(reservations)
-// //       .orderBy(desc(reservations.created_at));
-    
-// //     return allReservations;
-// //   } catch (error) {
-// //     console.error('Erreur lors de la récupération des réservations:', error);
-// //     return [];
-// //   }
-// // }
-
-// // // Récupérer les réservations par véhicule
-// // export async function getReservationsByVehicle(vehicleId) {
-// //   try {
-// //     const vehicleReservations = await db
-// //       .select()
-// //       .from(reservations)
-// //       .where(eq(reservations.vehicle_id, vehicleId));
-    
-// //     return vehicleReservations;
-// //   } catch (error) {
-// //     console.error('Erreur lors de la récupération des réservations:', error);
-// //     return [];
-// //   }
-// // }
-
-// // // Vérifier la disponibilité d'un véhicule
-// // export async function checkVehicleAvailability(
-// //   vehicleId,
-// //   pickupDate,
-// //   returnDate
-// // ) {
-// //   try {
-// //     const existingReservations = await db
-// //       .select()
-// //       .from(reservations)
-// //       .where(eq(reservations.vehicle_id, vehicleId));
-
-// //     const requestedPickup = new Date(pickupDate);
-// //     const requestedReturn = new Date(returnDate);
-
-// //     const hasConflict = existingReservations.some((reservation) => {
-// //       // Ignorer les réservations annulées
-// //       if (reservation.status === 'cancelled') return false;
-      
-// //       const existingPickup = new Date(reservation.pickup_date);
-// //       const existingReturn = new Date(reservation.return_date);
-
-// //       return (
-// //         requestedPickup <= existingReturn &&
-// //         requestedReturn >= existingPickup
-// //       );
-// //     });
-
-// //     return !hasConflict;
-// //   } catch (error) {
-// //     console.error('Erreur lors de la vérification de disponibilité:', error);
-// //     return false;
-// //   }
-// // }
-
-// // // Créer une réservation (SANS EMAIL - envoyé côté client)
-// // export async function createReservation(formData) {
-// //   try {
-// //     const vehicleId = parseInt(formData.get('vehicle_id'));
-
-// //     const customerName = formData.get('customer_name');
-// //     const customerEmail = formData.get('customer_email');
-// //     const customerPhone = formData.get('customer_phone');
-
-// //     const pickupLocation = formData.get('pickup_location');
-// //     const dropoffLocation = formData.get('dropoff_location');
-
-// //     const pickupDate = formData.get('pickup_date');
-// //     const returnDate = formData.get('return_date');
-    
-// //     const notes = formData.get('notes') || null;
-
-// //     // Validation des champs requis
-// //     if (!customerName || !customerEmail || !customerPhone) {
-// //       return {
-// //         success: false,
-// //         message: 'Veuillez remplir tous les champs obligatoires',
-// //       };
-// //     }
-
-// //     // Validation email
-// //     if (!customerEmail.includes('@') || !customerEmail.includes('.')) {
-// //       return {
-// //         success: false,
-// //         message: 'Veuillez entrer un email valide',
-// //       };
-// //     }
-
-// //     // Récupérer le véhicule
-// //     const vehicle = await db
-// //       .select()
-// //       .from(vehicles)
-// //       .where(eq(vehicles.id, vehicleId));
-
-// //     if (!vehicle.length) {
-// //       return {
-// //         success: false,
-// //         message: 'Véhicule non trouvé',
-// //       };
-// //     }
-
-// //     const selectedVehicle = vehicle[0];
-
-// //     // Vérifier la disponibilité
-// //     const isAvailable = await checkVehicleAvailability(
-// //       vehicleId,
-// //       pickupDate,
-// //       returnDate
-// //     );
-
-// //     if (!isAvailable) {
-// //       return {
-// //         success: false,
-// //         message: 'Ce véhicule n\'est pas disponible pour les dates sélectionnées',
-// //       };
-// //     }
-
-// //     // Calculer le nombre de jours
-// //     const start = new Date(pickupDate);
-// //     const end = new Date(returnDate);
-// //     const diffTime = Math.abs(end - start);
-// //     const numberOfDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-
-// //     // Calculer le prix total
-// //     const totalPrice = numberOfDays * selectedVehicle.prix;
-
-// //     // Créer la réservation
-// //     await db.insert(reservations).values({
-// //       vehicle_id: vehicleId,
-// //       customer_name: customerName,
-// //       customer_email: customerEmail,
-// //       customer_phone: customerPhone,
-// //       pickup_location: pickupLocation,
-// //       dropoff_location: dropoffLocation,
-// //       pickup_date: pickupDate,
-// //       return_date: returnDate,
-// //       total_price: totalPrice,
-// //       status: 'pending',
-// //       payment_status: 'unpaid',
-// //       notes: notes,
-// //     });
-
-// //     // ⚠️ L'EMAIL DE CONFIRMATION EST ENVOYÉ PAR BookingModalGlobal.jsx (CÔTÉ CLIENT)
-// //     // On ne l'envoie PAS ici pour éviter l'erreur "location is not defined"
-
-// //     revalidatePath('/');
-// //     revalidatePath('/fleet');
-// //     revalidatePath('/admin/dashboard');
-// //     revalidateTag('reservations');
-
-// //     // Retourner les détails pour l'email côté client
-// //     return {
-// //       success: true,
-// //       message: 'Réservation créée avec succès ! Un email de confirmation vous a été envoyé.',
-// //       reservation: {
-// //         id: null, // L'ID sera généré
-// //         customerName,
-// //         customerEmail,
-// //         customerPhone,
-// //         vehicle: selectedVehicle,
-// //         pickupDate,
-// //         returnDate,
-// //         totalPrice,
-// //         pickupLocation,
-// //         dropoffLocation,
-// //       }
-// //     };
-// //   } catch (error) {
-// //     console.error('Erreur lors de la création de la réservation:', error);
-// //     return {
-// //       success: false,
-// //       message: 'Une erreur est survenue. Veuillez réessayer.',
-// //     };
-// //   }
-// // }
-
-// // // Mettre à jour le statut d'une réservation (SANS EMAIL - envoyé côté client)
-// // export async function updateReservationStatus(reservationId, newStatus) {
-// //   await checkAdmin();
-
-// //   try {
-// //     await db
-// //       .update(reservations)
-// //       .set({ status: newStatus })
-// //       .where(eq(reservations.id, reservationId));
-
-// //     revalidatePath('/admin/dashboard');
-// //     revalidateTag('reservations');
-
-// //     return { 
-// //       success: true, 
-// //       message: 'Statut mis à jour',
-// //       status: newStatus,
-// //       reservationId
-// //     };
-// //   } catch (error) {
-// //     console.error('Erreur lors de la mise à jour du statut:', error);
-// //     return { success: false, message: 'Erreur lors de la mise à jour' };
-// //   }
-// // }
-
-// // // Supprimer une réservation
-// // export async function deleteReservation(reservationId) {
-// //   await checkAdmin();
-
-// //   try {
-// //     await db
-// //       .delete(reservations)
-// //       .where(eq(reservations.id, reservationId));
-
-// //     revalidatePath('/admin/dashboard');
-// //     revalidateTag('reservations');
-
-// //     return { success: true, message: 'Réservation supprimée' };
-// //   } catch (error) {
-// //     console.error('Erreur lors de la suppression:', error);
-// //     return { success: false, message: 'Erreur lors de la suppression' };
-// //   }
-// // }
-
-// // // =========================
-// // // AUTHENTIFICATION
-// // // =========================
-
-// // // Login admin
-// // export async function loginAdmin(formData) {
-// //   const email = formData.get('email');
-// //   const password = formData.get('password');
-
-// //   const adminEmail = process.env.ADMIN_EMAIL;
-// //   const adminPassword = process.env.ADMIN_PASSWORD;
-
-// //   if (!adminEmail || !adminPassword) {
-// //     return { success: false, message: 'Erreur de configuration' };
-// //   }
-
-// //   if (email === adminEmail && password === adminPassword) {
-// //     const cookieStore = await cookies();
-// //     cookieStore.set('admin_session', 'authenticated', {
-// //       httpOnly: true,
-// //       secure: process.env.NODE_ENV === 'production',
-// //       maxAge: 60 * 60 * 24,
-// //       path: '/',
-// //     });
-// //     redirect('/admin/dashboard');
-// //   } else {
-// //     return { success: false, message: 'Email ou mot de passe incorrect' };
-// //   }
-// // }
-
-// // // Logout admin
-// // export async function logoutAdmin() {
-// //   const cookieStore = await cookies();
-// //   cookieStore.delete('admin_session');
-// //   redirect('/');
-// // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // Server Actions pour les opérations CRUD
-// 'use server';
-
-// import { db } from './db.js';
-// import { vehicles, reservations } from './schema.js';
-// import { eq, desc, and, ne, or } from 'drizzle-orm';
-// import { revalidatePath, revalidateTag } from 'next/cache';
-// import { cookies } from 'next/headers';
-// import { redirect } from 'next/navigation';
-
-// // =========================
-// // FONCTIONS ADMIN
-// // =========================
-
-// async function checkAdmin() {
-//   const cookieStore = await cookies();
-//   const isAdmin = cookieStore.get('admin_session');
-//   if (!isAdmin || isAdmin.value !== 'authenticated') {
-//     redirect('/admin/login');
-//   }
-// }
-
-// // =========================
-// // VEHICLES CRUD
-// // =========================
-
-// // Récupérer tous les véhicules
-// export async function getVehicles() {
-//   try {
-//     return await db.select().from(vehicles);
-//   } catch (error) {
-//     console.error('Erreur:', error);
-//     return [];
-//   }
-// }
-
-// // Récupérer les véhicules en vedette
-// export async function getFeaturedVehicles() {
-//   try {
-//     return await db.select().from(vehicles).limit(3);
-//   } catch (error) {
-//     console.error('Erreur:', error);
-//     return [];
-//   }
-// }
-
-// // Ajouter un véhicule
-// export async function addVehicle(formData) {
-//   await checkAdmin();
-  
-//   try {
-//     const marque = formData.get('marque');
-//     const modele = formData.get('modele');
-//     const prix = parseInt(formData.get('prix'));
-//     const description = formData.get('description');
-//     const categorie = formData.get('categorie') || 'classique';
-    
-//     let imageData = null;
-//     let imageUrl = null;
-    
-//     const imageFile = formData.get('imageFile');
-//     const imageUrlInput = formData.get('imageUrl');
-    
-//     if (imageFile && imageFile.size > 0) {
-//       const bytes = await imageFile.arrayBuffer();
-//       const buffer = Buffer.from(bytes);
-//       const base64 = buffer.toString('base64');
-//       imageData = `data:${imageFile.type};base64,${base64}`;
-//     } else if (imageUrlInput && imageUrlInput.trim() !== '') {
-//       imageUrl = imageUrlInput;
-//     } else {
-//       imageUrl = '/images/placeholder-car.jpg';
-//     }
-
-//     const newVehicle = {
-//       marque,
-//       modele,
-//       prix,
-//       description,
-//       categorie,
-//       image_data: imageData,
-//       image_url: imageUrl,
-//     };
-
-//     await db.insert(vehicles).values(newVehicle);
-//     revalidatePath('/fleet');
-//     revalidatePath('/admin/dashboard');
-//     return { success: true, message: 'Véhicule ajouté avec succès' };
-//   } catch (error) {
-//     console.error('Erreur:', error);
-//     return { success: false, message: error.message };
-//   }
-// }
-
-// // Mettre à jour un véhicule
-// export async function updateVehicle(id, formData) {
-//   await checkAdmin();
-
-//   try {
-//     const updatedVehicle = {};
-    
-//     const marque = formData.get('marque');
-//     const modele = formData.get('modele');
-//     const prix = formData.get('prix');
-//     const description = formData.get('description');
-//     const categorie = formData.get('categorie');
-    
-//     if (marque) updatedVehicle.marque = marque;
-//     if (modele) updatedVehicle.modele = modele;
-//     if (prix) updatedVehicle.prix = parseInt(prix);
-//     if (description) updatedVehicle.description = description;
-//     if (categorie) updatedVehicle.categorie = categorie;
-    
-//     const imageFile = formData.get('imageFile');
-//     const imageUrlInput = formData.get('imageUrl');
-    
-//     if (imageFile && imageFile.size > 0) {
-//       const bytes = await imageFile.arrayBuffer();
-//       const buffer = Buffer.from(bytes);
-//       const base64 = buffer.toString('base64');
-//       updatedVehicle.image_data = `data:${imageFile.type};base64,${base64}`;
-//     } else if (imageUrlInput && imageUrlInput.trim() !== '') {
-//       updatedVehicle.image_url = imageUrlInput;
-//     }
-
-//     if (Object.keys(updatedVehicle).length === 0) {
-//       return { success: false, message: 'Aucune modification' };
-//     }
-
-//     await db.update(vehicles).set(updatedVehicle).where(eq(vehicles.id, id));
-//     revalidatePath('/fleet');
-//     revalidatePath('/admin/dashboard');
-//     return { success: true, message: 'Véhicule modifié avec succès' };
-//   } catch (error) {
-//     console.error('Erreur:', error);
-//     return { success: false, message: error.message };
-//   }
-// }
-
-// // Supprimer un véhicule
-// export async function deleteVehicle(id) {
-//   await checkAdmin();
-
-//   try {
-//     await db.delete(vehicles).where(eq(vehicles.id, id));
-//     revalidatePath('/fleet');
-//     revalidatePath('/admin/dashboard');
-//     return { success: true, message: 'Véhicule supprimé avec succès' };
-//   } catch (error) {
-//     console.error('Erreur:', error);
-//     return { success: false, message: error.message };
-//   }
-// }
-
-// // =========================
-// // RESERVATIONS CRUD
-// // =========================
-
-// // Récupérer toutes les réservations
-// export async function getReservations() {
-//   await checkAdmin();
-
-//   try {
-//     const allReservations = await db
-//       .select()
-//       .from(reservations)
-//       .orderBy(desc(reservations.created_at));
-    
-//     return allReservations;
-//   } catch (error) {
-//     console.error('Erreur lors de la récupération des réservations:', error);
-//     return [];
-//   }
-// }
-
-// // Récupérer les réservations par véhicule
-// export async function getReservationsByVehicle(vehicleId) {
-//   try {
-//     const vehicleReservations = await db
-//       .select()
-//       .from(reservations)
-//       .where(eq(reservations.vehicle_id, vehicleId));
-    
-//     return vehicleReservations;
-//   } catch (error) {
-//     console.error('Erreur lors de la récupération des réservations:', error);
-//     return [];
-//   }
-// }
-
-// // =========================
-// // VÉRIFICATION DISPONIBILITÉ - VERSION AVANCÉE
-// // =========================
-
-// /**
-//  * Vérifie la disponibilité d'un véhicule pour une période donnée
-//  * @param {number} vehicleId - ID du véhicule
-//  * @param {string} pickupDate - Date de début (YYYY-MM-DD)
-//  * @param {string} returnDate - Date de fin (YYYY-MM-DD)
-//  * @returns {Promise<boolean>} - true si disponible, false si occupé
-//  */
-// export async function checkVehicleAvailability(vehicleId, pickupDate, returnDate) {
-//   try {
-//     // Récupérer les réservations actives (pending ou confirmed)
-//     const activeReservations = await db
-//       .select()
-//       .from(reservations)
-//       .where(
-//         and(
-//           eq(reservations.vehicle_id, vehicleId),
-//           or(
-//             eq(reservations.status, 'pending'),
-//             eq(reservations.status, 'confirmed')
-//           )
-//         )
-//       );
-
-//     const requestedPickup = new Date(pickupDate);
-//     const requestedReturn = new Date(returnDate);
-
-//     const hasConflict = activeReservations.some((reservation) => {
-//       const existingPickup = new Date(reservation.pickup_date);
-//       const existingReturn = new Date(reservation.return_date);
-
-//       // Vérifier le chevauchement des périodes
-//       return (
-//         requestedPickup <= existingReturn &&
-//         requestedReturn >= existingPickup
-//       );
-//     });
-
-//     return !hasConflict; // true = disponible, false = conflit
-//   } catch (error) {
-//     console.error('Erreur lors de la vérification de disponibilité:', error);
-//     return false;
-//   }
-// }
-
-// /**
-//  * Vérifie si un véhicule est disponible à une date spécifique (pour les badges)
-//  * @param {number} vehicleId - ID du véhicule
-//  * @param {string} dateStr - Date au format YYYY-MM-DD
-//  * @returns {Promise<boolean>} - true si disponible, false si occupé
-//  */
-// export async function checkVehicleAvailabilityByDate(vehicleId, dateStr) {
-//   try {
-//     // Récupérer les réservations actives (pending ou confirmed)
-//     const activeReservations = await db
-//       .select()
-//       .from(reservations)
-//       .where(
-//         and(
-//           eq(reservations.vehicle_id, vehicleId),
-//           or(
-//             eq(reservations.status, 'pending'),
-//             eq(reservations.status, 'confirmed')
-//           )
-//         )
-//       );
-
-//     // Vérifier si la date cible tombe dans une période de réservation
-//     const isBooked = activeReservations.some((reservation) => {
-//       const pickupDate = reservation.pickup_date;
-//       const returnDate = reservation.return_date;
-      
-//       return dateStr >= pickupDate && dateStr <= returnDate;
-//     });
-
-//     return !isBooked; // true = disponible, false = occupé
-//   } catch (error) {
-//     console.error('Erreur lors de la vérification de disponibilité:', error);
-//     return true; // Par défaut, considérer disponible
-//   }
-// }
-
-// /**
-//  * Vérifie la disponibilité de plusieurs véhicules pour une date donnée
-//  * @param {Array} vehiclesList - Liste des véhicules
-//  * @param {string} dateStr - Date au format YYYY-MM-DD
-//  * @returns {Promise<Object>} - Mapping vehicleId -> disponibilité
-//  */
-// export async function checkMultipleVehiclesAvailability(vehiclesList, dateStr) {
-//   try {
-//     const availabilityMap = {};
-    
-//     for (const vehicle of vehiclesList) {
-//       const isAvailable = await checkVehicleAvailabilityByDate(vehicle.id, dateStr);
-//       availabilityMap[vehicle.id] = isAvailable;
-//     }
-    
-//     return availabilityMap;
-//   } catch (error) {
-//     console.error('Erreur lors de la vérification multiple:', error);
-//     return {};
-//   }
-// }
-
-// // =========================
-// // CRÉATION RÉSERVATION
-// // =========================
-
-// // Créer une réservation
-// export async function createReservation(formData) {
-//   try {
-//     const vehicleId = parseInt(formData.get('vehicle_id'));
-
-//     const customerName = formData.get('customer_name');
-//     const customerEmail = formData.get('customer_email');
-//     const customerPhone = formData.get('customer_phone');
-
-//     const pickupLocation = formData.get('pickup_location');
-//     const dropoffLocation = formData.get('dropoff_location');
-
-//     const pickupDate = formData.get('pickup_date');
-//     const returnDate = formData.get('return_date');
-    
-//     const notes = formData.get('notes') || null;
-
-//     // Validation des champs requis
-//     if (!customerName || !customerEmail || !customerPhone) {
-//       return {
-//         success: false,
-//         message: 'Veuillez remplir tous les champs obligatoires',
-//       };
-//     }
-
-//     // Validation email
-//     if (!customerEmail.includes('@') || !customerEmail.includes('.')) {
-//       return {
-//         success: false,
-//         message: 'Veuillez entrer un email valide',
-//       };
-//     }
-
-//     // Récupérer le véhicule
-//     const vehicle = await db
-//       .select()
-//       .from(vehicles)
-//       .where(eq(vehicles.id, vehicleId));
-
-//     if (!vehicle.length) {
-//       return {
-//         success: false,
-//         message: 'Véhicule non trouvé',
-//       };
-//     }
-
-//     const selectedVehicle = vehicle[0];
-
-//     // Vérifier la disponibilité (anti-double booking)
-//     const isAvailable = await checkVehicleAvailability(
-//       vehicleId,
-//       pickupDate,
-//       returnDate
-//     );
-
-//     if (!isAvailable) {
-//       return {
-//         success: false,
-//         message: 'Ce véhicule n\'est pas disponible pour les dates sélectionnées',
-//       };
-//     }
-
-//     // Calculer le nombre de jours
-//     const start = new Date(pickupDate);
-//     const end = new Date(returnDate);
-//     const diffTime = Math.abs(end - start);
-//     const numberOfDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-
-//     // Calculer le prix total
-//     const totalPrice = numberOfDays * selectedVehicle.prix;
-
-//     // Créer la réservation
-//     await db.insert(reservations).values({
-//       vehicle_id: vehicleId,
-//       customer_name: customerName,
-//       customer_email: customerEmail,
-//       customer_phone: customerPhone,
-//       pickup_location: pickupLocation,
-//       dropoff_location: dropoffLocation,
-//       pickup_date: pickupDate,
-//       return_date: returnDate,
-//       total_price: totalPrice,
-//       status: 'pending',
-//       payment_status: 'unpaid',
-//       notes: notes,
-//     });
-
-//     revalidatePath('/');
-//     revalidatePath('/fleet');
-//     revalidatePath('/admin/dashboard');
-//     revalidateTag('reservations');
-
-//     return {
-//       success: true,
-//       message: 'Réservation créée avec succès ! Un email de confirmation vous a été envoyé.',
-//       reservation: {
-//         customerName,
-//         customerEmail,
-//         customerPhone,
-//         vehicle: selectedVehicle,
-//         pickupDate,
-//         returnDate,
-//         totalPrice,
-//         pickupLocation,
-//         dropoffLocation,
-//       }
-//     };
-//   } catch (error) {
-//     console.error('Erreur lors de la création de la réservation:', error);
-//     return {
-//       success: false,
-//       message: 'Une erreur est survenue. Veuillez réessayer.',
-//     };
-//   }
-// }
-
-// // =========================
-// // GESTION STATUT RÉSERVATION
-// // =========================
-
-// // Mettre à jour le statut d'une réservation
-// export async function updateReservationStatus(reservationId, newStatus) {
-//   await checkAdmin();
-
-//   try {
-//     // Récupérer les détails de la réservation avant modification
-//     const reservationResult = await db
-//       .select()
-//       .from(reservations)
-//       .where(eq(reservations.id, reservationId));
-    
-//     if (!reservationResult.length) {
-//       return { success: false, message: 'Réservation non trouvée' };
-//     }
-    
-//     const reservation = reservationResult[0];
-    
-//     // Mettre à jour le statut
-//     await db
-//       .update(reservations)
-//       .set({ status: newStatus })
-//       .where(eq(reservations.id, reservationId));
-
-//     revalidatePath('/admin/dashboard');
-//     revalidateTag('reservations');
-
-//     // Retourner les informations pour l'email (côté client)
-//     return { 
-//       success: true, 
-//       message: 'Statut mis à jour',
-//       status: newStatus,
-//       reservationId,
-//       reservation: {
-//         customerEmail: reservation.customer_email,
-//         customerName: reservation.customer_name,
-//         pickupDate: reservation.pickup_date,
-//         returnDate: reservation.return_date,
-//         totalPrice: reservation.total_price,
-//       }
-//     };
-//   } catch (error) {
-//     console.error('Erreur lors de la mise à jour du statut:', error);
-//     return { success: false, message: 'Erreur lors de la mise à jour' };
-//   }
-// }
-
-// // Supprimer une réservation
-// export async function deleteReservation(reservationId) {
-//   await checkAdmin();
-
-//   try {
-//     await db
-//       .delete(reservations)
-//       .where(eq(reservations.id, reservationId));
-
-//     revalidatePath('/admin/dashboard');
-//     revalidateTag('reservations');
-
-//     return { success: true, message: 'Réservation supprimée' };
-//   } catch (error) {
-//     console.error('Erreur lors de la suppression:', error);
-//     return { success: false, message: 'Erreur lors de la suppression' };
-//   }
-// }
-
-// // =========================
-// // STATISTIQUES
-// // =========================
-
-// /**
-//  * Récupère les statistiques pour le dashboard admin
-//  */
-// export async function getDashboardStats() {
-//   await checkAdmin();
-
-//   try {
-//     const allReservations = await db.select().from(reservations);
-//     const allVehicles = await db.select().from(vehicles);
-    
-//     const pendingReservations = allReservations.filter(r => r.status === 'pending').length;
-//     const confirmedReservations = allReservations.filter(r => r.status === 'confirmed').length;
-//     const cancelledReservations = allReservations.filter(r => r.status === 'cancelled').length;
-//     const completedReservations = allReservations.filter(r => r.status === 'completed').length;
-    
-//     const totalRevenue = allReservations
-//       .filter(r => r.status === 'confirmed' || r.status === 'completed')
-//       .reduce((sum, r) => sum + (r.total_price || 0), 0);
-    
-//     return {
-//       success: true,
-//       stats: {
-//         totalVehicles: allVehicles.length,
-//         totalReservations: allReservations.length,
-//         pendingReservations,
-//         confirmedReservations,
-//         cancelledReservations,
-//         completedReservations,
-//         totalRevenue,
-//       }
-//     };
-//   } catch (error) {
-//     console.error('Erreur lors de la récupération des statistiques:', error);
-//     return { success: false, stats: null };
-//   }
-// }
-
-// // =========================
-// // AUTHENTIFICATION
-// // =========================
-
-// // Login admin
-// export async function loginAdmin(formData) {
-//   const email = formData.get('email');
-//   const password = formData.get('password');
-
-//   const adminEmail = process.env.ADMIN_EMAIL;
-//   const adminPassword = process.env.ADMIN_PASSWORD;
-
-//   if (!adminEmail || !adminPassword) {
-//     return { success: false, message: 'Erreur de configuration' };
-//   }
-
-//   if (email === adminEmail && password === adminPassword) {
-//     const cookieStore = await cookies();
-//     cookieStore.set('admin_session', 'authenticated', {
-//       httpOnly: true,
-//       secure: process.env.NODE_ENV === 'production',
-//       maxAge: 60 * 60 * 24,
-//       path: '/',
-//     });
-//     redirect('/admin/dashboard');
-//   } else {
-//     return { success: false, message: 'Email ou mot de passe incorrect' };
-//   }
-// }
-
-// // Logout admin
-// export async function logoutAdmin() {
-//   const cookieStore = await cookies();
-//   cookieStore.delete('admin_session');
-//   redirect('/');
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // Server Actions pour les opérations CRUD
-// 'use server';
-
-// import { db } from './db.js';
-// import { vehicles, reservations } from './schema.js';
-// import { eq, desc, and, ne, or } from 'drizzle-orm';
-// import { revalidatePath, revalidateTag } from 'next/cache';
-// import { cookies } from 'next/headers';
-// import { redirect } from 'next/navigation';
-
-// // =========================
-// // FONCTIONS ADMIN
-// // =========================
-
-// async function checkAdmin() {
-//   const cookieStore = await cookies();
-//   const isAdmin = cookieStore.get('admin_session');
-//   if (!isAdmin || isAdmin.value !== 'authenticated') {
-//     redirect('/admin/login');
-//   }
-// }
-
-// // =========================
-// // VEHICLES CRUD
-// // =========================
-
-// // Récupérer tous les véhicules
-// export async function getVehicles() {
-//   try {
-//     return await db.select().from(vehicles);
-//   } catch (error) {
-//     console.error('Erreur getVehicles:', error);
-//     return [];
-//   }
-// }
-
-// // Récupérer les véhicules en vedette
-// export async function getFeaturedVehicles() {
-//   try {
-//     return await db.select().from(vehicles).limit(3);
-//   } catch (error) {
-//     console.error('Erreur getFeaturedVehicles:', error);
-//     return [];
-//   }
-// }
-
-// // Ajouter un véhicule
-// export async function addVehicle(formData) {
-//   await checkAdmin();
-  
-//   try {
-//     const marque = formData.get('marque');
-//     const modele = formData.get('modele');
-//     const prix = parseInt(formData.get('prix'));
-//     const description = formData.get('description');
-//     const categorie = formData.get('categorie') || 'classique';
-    
-//     let imageData = null;
-//     let imageUrl = null;
-    
-//     const imageFile = formData.get('imageFile');
-//     const imageUrlInput = formData.get('imageUrl');
-    
-//     if (imageFile && imageFile.size > 0) {
-//       const bytes = await imageFile.arrayBuffer();
-//       const buffer = Buffer.from(bytes);
-//       const base64 = buffer.toString('base64');
-//       imageData = `data:${imageFile.type};base64,${base64}`;
-//     } else if (imageUrlInput && imageUrlInput.trim() !== '') {
-//       imageUrl = imageUrlInput;
-//     } else {
-//       imageUrl = '/images/placeholder-car.jpg';
-//     }
-
-//     const newVehicle = {
-//       marque,
-//       modele,
-//       prix,
-//       description,
-//       categorie,
-//       image_data: imageData,
-//       image_url: imageUrl,
-//     };
-
-//     await db.insert(vehicles).values(newVehicle);
-//     revalidatePath('/fleet');
-//     revalidatePath('/admin/dashboard');
-//     return { success: true, message: 'Véhicule ajouté avec succès' };
-//   } catch (error) {
-//     console.error('Erreur addVehicle:', error);
-//     return { success: false, message: error.message };
-//   }
-// }
-
-// // Mettre à jour un véhicule
-// export async function updateVehicle(id, formData) {
-//   await checkAdmin();
-
-//   try {
-//     const updatedVehicle = {};
-    
-//     const marque = formData.get('marque');
-//     const modele = formData.get('modele');
-//     const prix = formData.get('prix');
-//     const description = formData.get('description');
-//     const categorie = formData.get('categorie');
-    
-//     if (marque) updatedVehicle.marque = marque;
-//     if (modele) updatedVehicle.modele = modele;
-//     if (prix) updatedVehicle.prix = parseInt(prix);
-//     if (description) updatedVehicle.description = description;
-//     if (categorie) updatedVehicle.categorie = categorie;
-    
-//     const imageFile = formData.get('imageFile');
-//     const imageUrlInput = formData.get('imageUrl');
-    
-//     if (imageFile && imageFile.size > 0) {
-//       const bytes = await imageFile.arrayBuffer();
-//       const buffer = Buffer.from(bytes);
-//       const base64 = buffer.toString('base64');
-//       updatedVehicle.image_data = `data:${imageFile.type};base64,${base64}`;
-//     } else if (imageUrlInput && imageUrlInput.trim() !== '') {
-//       updatedVehicle.image_url = imageUrlInput;
-//     }
-
-//     if (Object.keys(updatedVehicle).length === 0) {
-//       return { success: false, message: 'Aucune modification' };
-//     }
-
-//     await db.update(vehicles).set(updatedVehicle).where(eq(vehicles.id, id));
-//     revalidatePath('/fleet');
-//     revalidatePath('/admin/dashboard');
-//     return { success: true, message: 'Véhicule modifié avec succès' };
-//   } catch (error) {
-//     console.error('Erreur updateVehicle:', error);
-//     return { success: false, message: error.message };
-//   }
-// }
-
-// // Supprimer un véhicule
-// export async function deleteVehicle(id) {
-//   await checkAdmin();
-
-//   try {
-//     await db.delete(vehicles).where(eq(vehicles.id, id));
-//     revalidatePath('/fleet');
-//     revalidatePath('/admin/dashboard');
-//     return { success: true, message: 'Véhicule supprimé avec succès' };
-//   } catch (error) {
-//     console.error('Erreur deleteVehicle:', error);
-//     return { success: false, message: error.message };
-//   }
-// }
-
-// // =========================
-// // RESERVATIONS CRUD
-// // =========================
-
-// // Récupérer toutes les réservations
-// export async function getReservations() {
-//   await checkAdmin();
-
-//   try {
-//     return await db.select().from(reservations).orderBy(desc(reservations.created_at));
-//   } catch (error) {
-//     console.error('Erreur getReservations:', error);
-//     return [];
-//   }
-// }
-
-// // Récupérer les réservations par véhicule
-// export async function getReservationsByVehicle(vehicleId) {
-//   try {
-//     return await db.select().from(reservations).where(eq(reservations.vehicle_id, vehicleId));
-//   } catch (error) {
-//     console.error('Erreur getReservationsByVehicle:', error);
-//     return [];
-//   }
-// }
-
-// // =========================
-// // VÉRIFICATION DISPONIBILITÉ
-// // =========================
-
-// // Vérifier la disponibilité d'un véhicule pour une période donnée
-// export async function checkVehicleAvailability(vehicleId, pickupDate, returnDate) {
-//   try {
-//     console.log('🔍 Vérification disponibilité:', { vehicleId, pickupDate, returnDate });
-    
-//     const existingReservations = await db
-//       .select()
-//       .from(reservations)
-//       .where(
-//         and(
-//           eq(reservations.vehicle_id, vehicleId),
-//           ne(reservations.status, 'cancelled'),
-//           ne(reservations.status, 'completed')
-//         )
-//       );
-
-//     console.log('📊 Réservations trouvées:', existingReservations.length);
-
-//     const requestedPickup = new Date(pickupDate);
-//     const requestedReturn = new Date(returnDate);
-
-//     const hasConflict = existingReservations.some((reservation) => {
-//       const existingPickup = new Date(reservation.pickup_date);
-//       const existingReturn = new Date(reservation.return_date);
-
-//       const conflict = (
-//         requestedPickup <= existingReturn &&
-//         requestedReturn >= existingPickup
-//       );
-      
-//       if (conflict) {
-//         console.log('⚠️ Conflit avec réservation:', reservation.id);
-//       }
-      
-//       return conflict;
-//     });
-
-//     console.log('✅ Disponible:', !hasConflict);
-//     return !hasConflict;
-//   } catch (error) {
-//     console.error('Erreur checkVehicleAvailability:', error);
-//     return true;
-//   }
-// }
-
-// // Vérifier disponibilité par date (pour les badges)
-// export async function checkVehicleAvailabilityByDate(vehicleId, dateStr) {
-//   try {
-//     const activeReservations = await db
-//       .select()
-//       .from(reservations)
-//       .where(
-//         and(
-//           eq(reservations.vehicle_id, vehicleId),
-//           ne(reservations.status, 'cancelled'),
-//           ne(reservations.status, 'completed')
-//         )
-//       );
-
-//     const isBooked = activeReservations.some((reservation) => {
-//       const pickupDate = reservation.pickup_date;
-//       const returnDate = reservation.return_date;
-      
-//       return dateStr >= pickupDate && dateStr <= returnDate;
-//     });
-
-//     return !isBooked;
-//   } catch (error) {
-//     console.error('Erreur checkVehicleAvailabilityByDate:', error);
-//     return true;
-//   }
-// }
-
-// // =========================
-// // CRÉATION RÉSERVATION
-// // =========================
-
-// // Créer une réservation
-// export async function createReservation(formData) {
-//   try {
-//     const vehicleId = parseInt(formData.get('vehicle_id'));
-
-//     const customerName = formData.get('customer_name');
-//     const customerEmail = formData.get('customer_email');
-//     const customerPhone = formData.get('customer_phone');
-
-//     const pickupLocation = formData.get('pickup_location');
-//     const dropoffLocation = formData.get('dropoff_location');
-
-//     const pickupDate = formData.get('pickup_date');
-//     const returnDate = formData.get('return_date');
-    
-//     const notes = formData.get('notes') || null;
-
-//     // Validation
-//     if (!customerName || !customerEmail || !customerPhone) {
-//       return {
-//         success: false,
-//         message: 'Veuillez remplir tous les champs obligatoires',
-//       };
-//     }
-
-//     if (!customerEmail.includes('@') || !customerEmail.includes('.')) {
-//       return {
-//         success: false,
-//         message: 'Veuillez entrer un email valide',
-//       };
-//     }
-
-//     // Récupérer le véhicule
-//     const vehicle = await db
-//       .select()
-//       .from(vehicles)
-//       .where(eq(vehicles.id, vehicleId));
-
-//     if (!vehicle.length) {
-//       return {
-//         success: false,
-//         message: 'Véhicule non trouvé',
-//       };
-//     }
-
-//     const selectedVehicle = vehicle[0];
-
-//     // Vérifier la disponibilité
-//     const isAvailable = await checkVehicleAvailability(vehicleId, pickupDate, returnDate);
-
-//     if (!isAvailable) {
-//       return {
-//         success: false,
-//         message: 'Ce véhicule n\'est pas disponible pour les dates sélectionnées',
-//       };
-//     }
-
-//     // Calculer le prix total
-//     const start = new Date(pickupDate);
-//     const end = new Date(returnDate);
-//     const diffTime = Math.abs(end - start);
-//     const numberOfDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-//     const totalPrice = numberOfDays * selectedVehicle.prix;
-
-//     // Créer la réservation
-//     await db.insert(reservations).values({
-//       vehicle_id: vehicleId,
-//       customer_name: customerName,
-//       customer_email: customerEmail,
-//       customer_phone: customerPhone,
-//       pickup_location: pickupLocation,
-//       dropoff_location: dropoffLocation,
-//       pickup_date: pickupDate,
-//       return_date: returnDate,
-//       total_price: totalPrice,
-//       status: 'pending',
-//       payment_status: 'unpaid',
-//       notes: notes,
-//     });
-
-//     revalidatePath('/');
-//     revalidatePath('/fleet');
-//     revalidatePath('/admin/dashboard');
-//     revalidateTag('reservations');
-
-//     return {
-//       success: true,
-//       message: 'Réservation créée avec succès ! Un email de confirmation vous a été envoyé.',
-//       reservation: {
-//         customerName,
-//         customerEmail,
-//         customerPhone,
-//         vehicle: selectedVehicle,
-//         pickupDate,
-//         returnDate,
-//         totalPrice,
-//         pickupLocation,
-//         dropoffLocation,
-//       }
-//     };
-//   } catch (error) {
-//     console.error('Erreur createReservation:', error);
-//     return {
-//       success: false,
-//       message: 'Une erreur est survenue. Veuillez réessayer.',
-//     };
-//   }
-// }
-
-// // =========================
-// // GESTION STATUT RÉSERVATION
-// // =========================
-
-// // Mettre à jour le statut d'une réservation
-// export async function updateReservationStatus(reservationId, newStatus) {
-//   await checkAdmin();
-
-//   try {
-//     // Récupérer la réservation
-//     const reservationResult = await db
-//       .select()
-//       .from(reservations)
-//       .where(eq(reservations.id, reservationId));
-    
-//     if (!reservationResult.length) {
-//       return { success: false, message: 'Réservation non trouvée' };
-//     }
-    
-//     const reservation = reservationResult[0];
-    
-//     // Mettre à jour le statut
-//     await db
-//       .update(reservations)
-//       .set({ status: newStatus })
-//       .where(eq(reservations.id, reservationId));
-
-//     revalidatePath('/admin/dashboard');
-//     revalidateTag('reservations');
-
-//     return { 
-//       success: true, 
-//       message: 'Statut mis à jour',
-//       status: newStatus,
-//       reservationId,
-//       reservation: {
-//         customerEmail: reservation.customer_email,
-//         customerName: reservation.customer_name,
-//         pickupDate: reservation.pickup_date,
-//         returnDate: reservation.return_date,
-//         totalPrice: reservation.total_price,
-//       }
-//     };
-//   } catch (error) {
-//     console.error('Erreur updateReservationStatus:', error);
-//     return { success: false, message: 'Erreur lors de la mise à jour' };
-//   }
-// }
-
-// // Supprimer une réservation
-// export async function deleteReservation(reservationId) {
-//   await checkAdmin();
-
-//   try {
-//     await db.delete(reservations).where(eq(reservations.id, reservationId));
-//     revalidatePath('/admin/dashboard');
-//     revalidateTag('reservations');
-//     return { success: true, message: 'Réservation supprimée' };
-//   } catch (error) {
-//     console.error('Erreur deleteReservation:', error);
-//     return { success: false, message: 'Erreur lors de la suppression' };
-//   }
-// }
-
-// // =========================
-// // STATISTIQUES
-// // =========================
-
-// // Récupère les statistiques pour le dashboard admin
-// export async function getDashboardStats() {
-//   await checkAdmin();
-
-//   try {
-//     const allReservations = await db.select().from(reservations);
-//     const allVehicles = await db.select().from(vehicles);
-    
-//     const pendingReservations = allReservations.filter(r => r.status === 'pending').length;
-//     const confirmedReservations = allReservations.filter(r => r.status === 'confirmed').length;
-//     const cancelledReservations = allReservations.filter(r => r.status === 'cancelled').length;
-//     const completedReservations = allReservations.filter(r => r.status === 'completed').length;
-    
-//     const totalRevenue = allReservations
-//       .filter(r => r.status === 'confirmed' || r.status === 'completed')
-//       .reduce((sum, r) => sum + (r.total_price || 0), 0);
-    
-//     return {
-//       success: true,
-//       stats: {
-//         totalVehicles: allVehicles.length,
-//         totalReservations: allReservations.length,
-//         pendingReservations,
-//         confirmedReservations,
-//         cancelledReservations,
-//         completedReservations,
-//         totalRevenue,
-//       }
-//     };
-//   } catch (error) {
-//     console.error('Erreur getDashboardStats:', error);
-//     return { success: false, stats: null };
-//   }
-// }
-
-// // =========================
-// // AUTHENTIFICATION
-// // =========================
-
-// // Login admin
-// export async function loginAdmin(formData) {
-//   const email = formData.get('email');
-//   const password = formData.get('password');
-
-//   const adminEmail = process.env.ADMIN_EMAIL;
-//   const adminPassword = process.env.ADMIN_PASSWORD;
-
-//   if (!adminEmail || !adminPassword) {
-//     return { success: false, message: 'Erreur de configuration' };
-//   }
-
-//   if (email === adminEmail && password === adminPassword) {
-//     const cookieStore = await cookies();
-//     cookieStore.set('admin_session', 'authenticated', {
-//       httpOnly: true,
-//       secure: process.env.NODE_ENV === 'production',
-//       maxAge: 60 * 60 * 24,
-//       path: '/',
-//     });
-//     redirect('/admin/dashboard');
-//   } else {
-//     return { success: false, message: 'Email ou mot de passe incorrect' };
-//   }
-// }
-
-// // Logout admin
-// export async function logoutAdmin() {
-//   const cookieStore = await cookies();
-//   cookieStore.delete('admin_session');
-//   redirect('/');
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Server Actions pour les opérations CRUD
 'use server';
 
-import { db } from './db.js';
-import { vehicles, reservations } from './schema.js';
-import { eq, desc, and, ne, or, lt } from 'drizzle-orm';
+import { connectToDatabase } from './mongodb';
+import Vehicle from '@/models/Vehicle';
+import Reservation from '@/models/Reservation';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import Stripe from 'stripe';
+
+// Import des fonctions email
+import { 
+  sendBookingRequestEmail, 
+  sendAdminNotificationEmail, 
+  sendPaymentLinkEmail,
+  sendFinalConfirmationEmail,
+  sendRejectionEmail 
+} from '@/lib/server/email-nodemailer';
+
+
+
 
 // =========================
 // CONSTANTES
 // =========================
 const EXPIRATION_MINUTES = 15;
-const ACTIVE_STATUSES = ['pending', 'confirmed']; // Statuts qui bloquent
-const BLOCKING_STATUSES = ['pending', 'confirmed']; // Statuts qui bloquent la disponibilité
+const ACTIVE_STATUSES = ['pending', 'confirmed'];
+const BLOCKING_STATUSES = ['pending', 'confirmed'];
 
 // =========================
 // FONCTIONS ADMIN
@@ -1713,7 +46,22 @@ async function checkAdmin() {
 
 export async function getVehicles() {
   try {
-    return await db.select().from(vehicles);
+    await connectToDatabase();
+    const allVehicles = await Vehicle.find({}).sort({ created_at: -1 }).lean();
+    
+    // Sérialisation COMPLÈTE
+    return allVehicles.map(v => ({
+      _id: v._id.toString(),
+      id: v._id.toString(),
+      marque: v.marque || '',
+      modele: v.modele || '',
+      prix: v.prix || 0,
+      description: v.description || '',
+      image_data: v.image_data || null,
+      image_url: v.image_url || '/images/placeholder-car.jpg',
+      categorie: v.categorie || 'classique',
+      created_at: v.created_at ? new Date(v.created_at).toISOString() : new Date().toISOString(),
+    }));
   } catch (error) {
     console.error('Erreur getVehicles:', error);
     return [];
@@ -1722,13 +70,48 @@ export async function getVehicles() {
 
 export async function getFeaturedVehicles() {
   try {
-    return await db.select().from(vehicles).limit(3);
+    await connectToDatabase();
+    const featured = await Vehicle.find({}).limit(3).lean();
+    return featured.map(v => ({
+      _id: v._id.toString(),
+      id: v._id.toString(),
+      marque: v.marque || '',
+      modele: v.modele || '',
+      prix: v.prix || 0,
+      description: v.description || '',
+      image_data: v.image_data || null,
+      image_url: v.image_url || '/images/placeholder-car.jpg',
+      categorie: v.categorie || 'classique',
+      created_at: v.created_at ? new Date(v.created_at).toISOString() : new Date().toISOString(),
+    }));
   } catch (error) {
     console.error('Erreur getFeaturedVehicles:', error);
     return [];
   }
 }
 
+export async function getVehicleById(id) {
+  try {
+    await connectToDatabase();
+    const vehicle = await Vehicle.findById(id).lean();
+    if (!vehicle) return null;
+    return {
+      _id: vehicle._id.toString(),
+      id: vehicle._id.toString(),
+      marque: vehicle.marque || '',
+      modele: vehicle.modele || '',
+      prix: vehicle.prix || 0,
+      description: vehicle.description || '',
+      image_data: vehicle.image_data || null,
+      image_url: vehicle.image_url || '/images/placeholder-car.jpg',
+      categorie: vehicle.categorie || 'classique',
+      created_at: vehicle.created_at ? new Date(vehicle.created_at).toISOString() : new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error('Erreur getVehicleById:', error);
+    return null;
+  }
+}
 export async function addVehicle(formData) {
   await checkAdmin();
   
@@ -1749,14 +132,32 @@ export async function addVehicle(formData) {
       const bytes = await imageFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const base64 = buffer.toString('base64');
-      imageData = `data:${imageFile.type};base64,${base64}`;
+      const dataUri = `data:${imageFile.type};base64,${base64}`;
+      
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', imageFile);
+      
+      const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/upload`, {
+        method: 'POST',
+        body: uploadFormData,
+      });
+      
+      if (uploadResponse.ok) {
+        const { url } = await uploadResponse.json();
+        imageUrl = url;
+        imageData = null;
+      } else {
+        imageData = dataUri;
+      }
     } else if (imageUrlInput && imageUrlInput.trim() !== '') {
       imageUrl = imageUrlInput;
     } else {
       imageUrl = '/images/placeholder-car.jpg';
     }
 
-    const newVehicle = {
+    await connectToDatabase();
+    
+    const newVehicle = new Vehicle({
       marque,
       modele,
       prix,
@@ -1764,9 +165,10 @@ export async function addVehicle(formData) {
       categorie,
       image_data: imageData,
       image_url: imageUrl,
-    };
+    });
 
-    await db.insert(vehicles).values(newVehicle);
+    await newVehicle.save();
+    
     revalidatePath('/fleet');
     revalidatePath('/admin/dashboard');
     return { success: true, message: 'Véhicule ajouté avec succès' };
@@ -1780,6 +182,8 @@ export async function updateVehicle(id, formData) {
   await checkAdmin();
 
   try {
+    await connectToDatabase();
+    
     const updatedVehicle = {};
     
     const marque = formData.get('marque');
@@ -1798,10 +202,24 @@ export async function updateVehicle(id, formData) {
     const imageUrlInput = formData.get('imageUrl');
     
     if (imageFile && imageFile.size > 0) {
-      const bytes = await imageFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const base64 = buffer.toString('base64');
-      updatedVehicle.image_data = `data:${imageFile.type};base64,${base64}`;
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', imageFile);
+      
+      const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/upload`, {
+        method: 'POST',
+        body: uploadFormData,
+      });
+      
+      if (uploadResponse.ok) {
+        const { url } = await uploadResponse.json();
+        updatedVehicle.image_url = url;
+        updatedVehicle.image_data = null;
+      } else {
+        const bytes = await imageFile.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const base64 = buffer.toString('base64');
+        updatedVehicle.image_data = `data:${imageFile.type};base64,${base64}`;
+      }
     } else if (imageUrlInput && imageUrlInput.trim() !== '') {
       updatedVehicle.image_url = imageUrlInput;
     }
@@ -1810,7 +228,8 @@ export async function updateVehicle(id, formData) {
       return { success: false, message: 'Aucune modification' };
     }
 
-    await db.update(vehicles).set(updatedVehicle).where(eq(vehicles.id, id));
+    await Vehicle.findByIdAndUpdate(id, updatedVehicle);
+    
     revalidatePath('/fleet');
     revalidatePath('/admin/dashboard');
     return { success: true, message: 'Véhicule modifié avec succès' };
@@ -1824,7 +243,8 @@ export async function deleteVehicle(id) {
   await checkAdmin();
 
   try {
-    await db.delete(vehicles).where(eq(vehicles.id, id));
+    await connectToDatabase();
+    await Vehicle.findByIdAndDelete(id);
     revalidatePath('/fleet');
     revalidatePath('/admin/dashboard');
     return { success: true, message: 'Véhicule supprimé avec succès' };
@@ -1834,68 +254,183 @@ export async function deleteVehicle(id) {
   }
 }
 
-// =========================
-// RESERVATIONS CRUD
-// =========================
 
 export async function getReservations() {
   await checkAdmin();
 
   try {
-    return await db.select().from(reservations).orderBy(desc(reservations.created_at));
+    await connectToDatabase();
+    const allReservations = await Reservation.find({})
+      .populate('vehicleId')  // ← La clé : populate
+      .sort({ created_at: -1 })
+      .lean();
+    
+    return allReservations.map(r => {
+      // Si populate a fonctionné
+      if (r.vehicleId && typeof r.vehicleId === 'object') {
+        return {
+          ...r,
+          _id: r._id.toString(),
+          id: r._id.toString(),
+          vehicle: {
+            _id: r.vehicleId._id.toString(),
+            id: r.vehicleId._id.toString(),
+            marque: r.vehicleId.marque || 'Unknown',
+            modele: r.vehicleId.modele || 'Vehicle',
+            prix: r.vehicleId.prix || 0,
+          },
+          vehicle_id: r.vehicleId._id.toString(),
+        };
+      }
+      
+      // Fallback si populate n'a pas fonctionné
+      return {
+        ...r,
+        _id: r._id.toString(),
+        id: r._id.toString(),
+        vehicle: null,
+        vehicle_id: r.vehicleId?.toString() || null,
+      };
+    });
   } catch (error) {
     console.error('Erreur getReservations:', error);
     return [];
   }
 }
 
+
+
+
 export async function getReservationsByVehicle(vehicleId) {
   try {
-    return await db.select().from(reservations).where(eq(reservations.vehicle_id, vehicleId));
+    await connectToDatabase();
+    const reservationsList = await Reservation.find({ vehicleId }).lean();
+    return reservationsList.map(r => ({
+      ...r,
+      _id: r._id.toString(),
+      id: r._id.toString(),
+    }));
   } catch (error) {
     console.error('Erreur getReservationsByVehicle:', error);
     return [];
   }
 }
 
+
+
+
 // =========================
-// VÉRIFICATION DISPONIBILITÉ OPTIMISÉE
+// GENERATE PAYMENT LINK (STRIPE)
 // =========================
 
-/**
- * Récupère la disponibilité de TOUS les véhicules pour une date donnée
- * UNE SEULE REQUÊTE au lieu de N requêtes
- */
+async function generatePaymentLink({ reservationId, totalPrice, vehicleName, customerEmail, customerName, pickupDate, returnDate }) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [
+      {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: vehicleName,
+            description: `Reservation: ${reservationId} | ${pickupDate} to ${returnDate}`,
+          },
+          unit_amount: Math.round(totalPrice * 100),
+        },
+        quantity: 1,
+      },
+    ],
+    mode: 'payment',
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/booking/confirmation?session_id={CHECKOUT_SESSION_ID}&reservation_id=${reservationId}`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/booking/cancel?reservation_id=${reservationId}`,
+    customer_email: customerEmail,
+    metadata: {
+      reservation_id: reservationId,
+      customer_name: customerName,
+      vehicle_name: vehicleName,
+    },
+  });
+  
+  return session.url;
+}
+
+
+
+
+
+
+
+// =========================
+// CONFIRM PAYMENT (WEBHOOK or API)
+// =========================
+
+export async function confirmPayment(reservationId, sessionId) {
+  try {
+    await connectToDatabase();
+    
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    
+    if (session.payment_status !== 'paid') {
+      return { success: false, message: 'Payment not completed' };
+    }
+    
+    // Update reservation to confirmed
+    await Reservation.findByIdAndUpdate(reservationId, { 
+      status: 'confirmed',
+      payment_status: 'paid',
+    });
+    
+    const reservation = await Reservation.findById(reservationId).populate('vehicleId');
+    
+    // Send final confirmation email
+    await sendFinalConfirmationEmail({
+      customerEmail: reservation.customer_email,
+      customerName: reservation.customer_name,
+      vehicle: reservation.vehicleId,
+      pickupDate: reservation.pickup_date,
+      pickupTime: reservation.pickup_time,      // ← AJOUTER
+      returnDate: reservation.return_date,
+      returnTime: reservation.return_time,      // ← AJOUTER
+      totalPrice: reservation.total_price,
+      pickupLocation: reservation.pickup_location,
+      dropoffLocation: reservation.dropoff_location
+    });
+    
+    revalidatePath('/admin/dashboard');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error confirmPayment:', error);
+    return { success: false };
+  }
+}
+
+
+
+// =========================
+// VÉRIFICATION DISPONIBILITÉ
+// =========================
+
 export async function getVehiclesAvailability(dateStr) {
   try {
-    const activeReservations = await db
-      .select({
-        vehicle_id: reservations.vehicle_id,
-        pickup_date: reservations.pickup_date,
-        return_date: reservations.return_date,
-      })
-      .from(reservations)
-      .where(
-        and(
-          or(
-            eq(reservations.status, 'pending'),
-            eq(reservations.status, 'confirmed')
-          ),
-          ne(reservations.status, 'cancelled'),
-          ne(reservations.status, 'completed')
-        )
-      );
+    await connectToDatabase();
+    
+    const activeReservations = await Reservation.find({
+      status: { $in: ['pending', 'confirmed'] },
+      pickup_date: { $lte: dateStr },
+      return_date: { $gte: dateStr },
+    }).lean();
     
     const unavailableMap = new Map();
     
     for (const reservation of activeReservations) {
-      if (dateStr >= reservation.pickup_date && dateStr <= reservation.return_date) {
-        unavailableMap.set(reservation.vehicle_id, {
-          vehicle_id: reservation.vehicle_id,
-          return_date: reservation.return_date,
-          pickup_date: reservation.pickup_date,
-        });
-      }
+      unavailableMap.set(reservation.vehicleId.toString(), {
+        vehicle_id: reservation.vehicleId,
+        return_date: reservation.return_date,
+        pickup_date: reservation.pickup_date,
+      });
     }
     
     return unavailableMap;
@@ -1905,153 +440,152 @@ export async function getVehiclesAvailability(dateStr) {
   }
 }
 
+
 // =========================
-// CRÉATION RÉSERVATION AVEC TRANSACTION
+// CRÉATION RÉSERVATION (SANS PAIEMENT)
 // =========================
 
 export async function createReservation(formData) {
   try {
-    const vehicleId = parseInt(formData.get('vehicle_id'));
-    const customerName = formData.get('customer_name');
-    const customerEmail = formData.get('customer_email');
-    const customerPhone = formData.get('customer_phone');
+    await connectToDatabase();
+    
+    const vehicleId = formData.get('vehicle_id');
+    const firstName = formData.get('first_name');
+    const lastName = formData.get('last_name');
+    const email = formData.get('email');
+    const phone = formData.get('phone');
+    const address = formData.get('address');
+    const city = formData.get('city');
+    const country = formData.get('country');
+    const birthDate = formData.get('birth_date');
+    const licenseNumber = formData.get('license_number');
+    const flightNumber = formData.get('flight_number');
+    const hotelName = formData.get('hotel_name');
     const pickupLocation = formData.get('pickup_location');
     const dropoffLocation = formData.get('dropoff_location');
     const pickupDate = formData.get('pickup_date');
+    const pickupTime = formData.get('pickup_time');
     const returnDate = formData.get('return_date');
-    const notes = formData.get('notes') || null;
+    const returnTime = formData.get('return_time');
 
-    // ========================
-    // VALIDATION DES CHAMPS
-    // ========================
-    if (!customerName || !customerEmail || !customerPhone) {
-      return { success: false, message: 'Veuillez remplir tous les champs obligatoires' };
+    // Validation
+    if (!firstName || !lastName || !email || !phone) {
+      return { success: false, message: 'Please fill all required fields' };
     }
 
-    if (!customerEmail.includes('@') || !customerEmail.includes('.')) {
-      return { success: false, message: 'Veuillez entrer un email valide' };
+    if (!email.includes('@')) {
+      return { success: false, message: 'Please enter a valid email' };
     }
 
-    // ========================
-    // VALIDATION DES DATES
-    // ========================
     const start = new Date(pickupDate);
     const end = new Date(returnDate);
     
     if (end < start) {
-      return { success: false, message: 'La date de retour doit être après la date de prise en charge' };
+      return { success: false, message: 'Return date must be after pickup date' };
     }
     
     if (start < new Date()) {
-      return { success: false, message: 'La date de prise en charge ne peut pas être dans le passé' };
+      return { success: false, message: 'Pickup date cannot be in the past' };
     }
 
-    // ========================
-    // RÉCUPÉRATION DU VÉHICULE
-    // ========================
-    const vehicle = await db
-      .select()
-      .from(vehicles)
-      .where(eq(vehicles.id, vehicleId));
-
-    if (!vehicle.length) {
-      return { success: false, message: 'Véhicule non trouvé' };
+    // Get vehicle
+    const selectedVehicle = await Vehicle.findById(vehicleId).lean();
+    
+    if (!selectedVehicle) {
+      return { success: false, message: 'Vehicle not found' };
     }
 
-    const selectedVehicle = vehicle[0];
-
-    // ========================
-    // CALCUL DU PRIX
-    // ========================
+    // Calculate price
     const diffTime = Math.abs(end - start);
     const numberOfDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
     const totalPrice = numberOfDays * selectedVehicle.prix;
 
-    // ========================
-    // TRANSACTION ATOMIQUE (anti-double réservation simultanée)
-    // ========================
-    let reservationId;
-    
-    await db.transaction(async (tx) => {
-      // Vérification dans la transaction (évite les collisions)
-      const existingReservations = await tx
-        .select()
-        .from(reservations)
-        .where(
-          and(
-            eq(reservations.vehicle_id, vehicleId),
-            ne(reservations.status, 'cancelled'),
-            ne(reservations.status, 'completed')
-          )
-        );
-
-      const requestedPickup = new Date(pickupDate);
-      const requestedReturn = new Date(returnDate);
-
-      const hasConflict = existingReservations.some((reservation) => {
-        const existingPickup = new Date(reservation.pickup_date);
-        const existingReturn = new Date(reservation.return_date);
-        
-        return requestedPickup <= existingReturn && requestedReturn >= existingPickup;
-      });
-
-      if (hasConflict) {
-        throw new Error('DOUBLON_DETECTE');
-      }
-
-      // Expiration dans 15 minutes
-      const expiresAt = new Date(Date.now() + EXPIRATION_MINUTES * 60 * 1000);
-      
-      const result = await tx.insert(reservations).values({
-        vehicle_id: vehicleId,
-        customer_name: customerName,
-        customer_email: customerEmail,
-        customer_phone: customerPhone,
-        pickup_location: pickupLocation,
-        dropoff_location: dropoffLocation,
-        pickup_date: pickupDate,
-        return_date: returnDate,
-        total_price: totalPrice,
-        status: 'pending',
-        payment_status: 'unpaid',
-        notes: notes,
-        expires_at: expiresAt,
-      }).returning({ id: reservations.id });
-      
-      reservationId = result[0]?.id;
+    // Check availability
+    const existingReservations = await Reservation.find({
+      vehicleId: vehicleId,
+      status: { $in: ['confirmed', 'validated', 'in_progress'] },
     });
+
+    const requestedPickup = new Date(pickupDate);
+    const requestedReturn = new Date(returnDate);
+
+    const hasConflict = existingReservations.some((reservation) => {
+      const existingPickup = new Date(reservation.pickup_date);
+      const existingReturn = new Date(reservation.return_date);
+      return requestedPickup <= existingReturn && requestedReturn >= existingPickup;
+    });
+
+    if (hasConflict) {
+      return { success: false, message: 'This vehicle is not available for the selected dates' };
+    }
+
+    // Create reservation with status 'pending'
+    const newReservation = new Reservation({
+      vehicleId: vehicleId,
+      customer_name: `${firstName} ${lastName}`,
+      customer_email: email,
+      customer_phone: phone,
+      pickup_location: pickupLocation,
+      dropoff_location: dropoffLocation,
+      pickup_date: pickupDate,
+      pickup_time: pickupTime,
+      return_date: returnDate,
+      return_time: returnTime,
+      total_price: totalPrice,
+      status: 'pending',
+      payment_status: 'unpaid',
+      notes: `Flight: ${flightNumber || 'N/A'}, Hotel: ${hotelName || 'N/A'}, Address: ${address || 'N/A'}, City: ${city || 'N/A'}, License: ${licenseNumber || 'N/A'}, Birth: ${birthDate || 'N/A'}`,
+    });
+    
+    const saved = await newReservation.save();
+
+    // Send email to customer (request received)
+  await sendBookingRequestEmail({
+  customerEmail: email,
+  customerName: `${firstName} ${lastName}`,
+  vehicle: selectedVehicle,
+  pickupDate: pickupDate,
+  pickupTime: pickupTime,        
+  returnDate: returnDate,
+  returnTime: returnTime,       
+  totalPrice: totalPrice,
+  pickupLocation: pickupLocation,
+  dropoffLocation: dropoffLocation,
+  reservationId: saved._id.toString(),
+});
+
+    // Send email to admin (new request)
+  await sendAdminNotificationEmail({
+  customerEmail: email,
+  customerName: `${firstName} ${lastName}`,
+  customerPhone: phone,
+  vehicle: selectedVehicle,
+  pickupDate: pickupDate,
+  pickupTime: pickupTime,        
+  returnDate: returnDate,
+  returnTime: returnTime,        
+  totalPrice: totalPrice,
+  pickupLocation: pickupLocation,
+  dropoffLocation: dropoffLocation,
+  reservationId: saved._id.toString(),
+});
 
     revalidatePath('/');
     revalidatePath('/fleet');
     revalidatePath('/admin/dashboard');
-    revalidateTag('reservations');
 
     return {
       success: true,
-      message: 'Réservation créée avec succès ! Un email de confirmation vous a été envoyé.',
-      reservation: {
-        customerName,
-        customerEmail,
-        customerPhone,
-        vehicle: selectedVehicle,
-        pickupDate,
-        returnDate,
-        totalPrice,
-        pickupLocation,
-        dropoffLocation,
-        reservationId,
-      }
+      message: 'Your booking request has been submitted! You will receive a confirmation email once our team validates your request.',
+      reservationId: saved._id.toString(),
     };
     
   } catch (error) {
-    if (error.message === 'DOUBLON_DETECTE') {
-      return { success: false, message: 'Ce véhicule n\'est pas disponible pour les dates sélectionnées' };
-    }
-    
-    console.error('Erreur createReservation:', error);
-    return { success: false, message: 'Une erreur est survenue. Veuillez réessayer.' };
+    console.error('Error createReservation:', error);
+    return { success: false, message: 'An error occurred. Please try again.' };
   }
 }
+
 
 // =========================
 // NETTOYAGE DES RÉSERVATIONS EXPIRÉES
@@ -2059,18 +593,19 @@ export async function createReservation(formData) {
 
 export async function cleanExpiredReservations() {
   try {
-    const result = await db
-      .update(reservations)
-      .set({ status: 'expired' })
-      .where(
-        and(
-          eq(reservations.status, 'pending'),
-          lt(reservations.expires_at, new Date())
-        )
-      );
+    await connectToDatabase();
+    const result = await Reservation.updateMany(
+      {
+        status: 'pending',
+        expires_at: { $lt: new Date() }
+      },
+      {
+        $set: { status: 'expired' }
+      }
+    );
     
-    console.log(`✅ ${result.changes || 0} réservations expirées nettoyées`);
-    return { success: true, count: result.changes || 0 };
+    console.log(`✅ ${result.modifiedCount || 0} réservations expirées nettoyées`);
+    return { success: true, count: result.modifiedCount || 0 };
   } catch (error) {
     console.error('Erreur cleanExpiredReservations:', error);
     return { success: false, count: 0 };
@@ -2085,21 +620,15 @@ export async function updateReservationStatus(reservationId, newStatus) {
   await checkAdmin();
 
   try {
-    const reservationResult = await db
-      .select()
-      .from(reservations)
-      .where(eq(reservations.id, reservationId));
+    await connectToDatabase();
     
-    if (!reservationResult.length) {
+    const reservation = await Reservation.findById(reservationId).lean();
+    
+    if (!reservation) {
       return { success: false, message: 'Réservation non trouvée' };
     }
     
-    const reservation = reservationResult[0];
-    
-    await db
-      .update(reservations)
-      .set({ status: newStatus })
-      .where(eq(reservations.id, reservationId));
+    await Reservation.findByIdAndUpdate(reservationId, { status: newStatus });
 
     revalidatePath('/admin/dashboard');
     revalidateTag('reservations');
@@ -2127,7 +656,8 @@ export async function deleteReservation(reservationId) {
   await checkAdmin();
 
   try {
-    await db.delete(reservations).where(eq(reservations.id, reservationId));
+    await connectToDatabase();
+    await Reservation.findByIdAndDelete(reservationId);
     revalidatePath('/admin/dashboard');
     revalidateTag('reservations');
     return { success: true, message: 'Réservation supprimée' };
@@ -2137,6 +667,115 @@ export async function deleteReservation(reservationId) {
   }
 }
 
+
+//VALIDATE RESERVATION
+export async function validateReservation(reservationId) {
+  await checkAdmin();
+
+  try {
+    console.log('🔍 1. Début validation pour:', reservationId);
+    
+    await connectToDatabase();
+    
+    const reservation = await Reservation.findById(reservationId).populate('vehicleId');
+    
+    if (!reservation) {
+      console.log('❌ Réservation non trouvée');
+      return { success: false, message: 'Reservation not found' };
+    }
+    
+    console.log('✅ 2. Réservation trouvée:', reservation.customer_email);
+    console.log('💰 3. Prix total:', reservation.total_price);
+    
+    // Update status to 'validated'
+    await Reservation.findByIdAndUpdate(reservationId, { status: 'validated' });
+    console.log('✅ 4. Statut mis à jour: validated');
+
+    // Generate payment link
+    console.log('🔗 5. Génération lien Stripe...');
+    const paymentLink = await generatePaymentLink({
+      reservationId: reservation._id.toString(),
+      totalPrice: reservation.total_price,
+      vehicleName: `${reservation.vehicleId.marque} ${reservation.vehicleId.modele}`,
+      customerEmail: reservation.customer_email,
+      customerName: reservation.customer_name,
+      pickupDate: reservation.pickup_date,
+      returnDate: reservation.return_date,
+    });
+    
+    console.log('✅ 6. Lien généré:', paymentLink);
+
+    // Send payment link email
+    console.log('📧 7. Envoi email paiement à:', reservation.customer_email);
+    const emailResult = await sendPaymentLinkEmail({
+  customerEmail: reservation.customer_email,
+  customerName: reservation.customer_name,
+  vehicle: reservation.vehicleId,
+  pickupDate: reservation.pickup_date,
+  pickupTime: reservation.pickup_time,      // ← Metre APRES pickupDate
+  returnDate: reservation.return_date,
+  returnTime: reservation.return_time,      // ← Metre APRES returnDate
+  totalPrice: reservation.total_price,
+  paymentLink,
+    });
+    
+    console.log('✅ 8. Résultat email:', emailResult);
+
+    revalidatePath('/admin/dashboard');
+    revalidateTag('reservations');
+
+    return { 
+      success: true, 
+      message: 'Reservation validated. Payment link sent to customer.',
+    };
+    
+  } catch (error) {
+    console.error('❌ ERREUR validateReservation:', error);
+    return { success: false, message: error.message };
+  }
+}
+
+
+
+// =========================
+// ADMIN REJECTS RESERVATION
+// =========================
+
+export async function rejectReservation(reservationId, reason) {
+  await checkAdmin();
+
+  try {
+    await connectToDatabase();
+    
+    await Reservation.findByIdAndUpdate(reservationId, { 
+      status: 'cancelled',
+      notes: `Rejected: ${reason || 'No reason provided'}`,
+    });
+    
+    const reservation = await Reservation.findById(reservationId);
+    
+    // Send rejection email
+    await sendRejectionEmail({
+      customerEmail: reservation.customer_email,
+      customerName: reservation.customer_name,
+      reason: reason || 'Availability issues',
+    });
+    
+    revalidatePath('/admin/dashboard');
+    
+    return { success: true, message: 'Reservation rejected.' };
+  } catch (error) {
+    console.error('Error rejectReservation:', error);
+    return { success: false, message: error.message };
+  }
+}
+
+
+
+
+
+
+
 // =========================
 // STATISTIQUES
 // =========================
@@ -2145,8 +784,10 @@ export async function getDashboardStats() {
   await checkAdmin();
 
   try {
-    const allReservations = await db.select().from(reservations);
-    const allVehicles = await db.select().from(vehicles);
+    await connectToDatabase();
+    
+    const allReservations = await Reservation.find({}).lean();
+    const allVehicles = await Vehicle.find({}).lean();
     
     const pendingReservations = allReservations.filter(r => r.status === 'pending').length;
     const confirmedReservations = allReservations.filter(r => r.status === 'confirmed').length;
@@ -2171,7 +812,15 @@ export async function getDashboardStats() {
     };
   } catch (error) {
     console.error('Erreur getDashboardStats:', error);
-    return { success: false, stats: null };
+    return { success: false, stats: {
+      totalVehicles: 0,
+      totalReservations: 0,
+      pendingReservations: 0,
+      confirmedReservations: 0,
+      cancelledReservations: 0,
+      completedReservations: 0,
+      totalRevenue: 0,
+    } };
   }
 }
 
