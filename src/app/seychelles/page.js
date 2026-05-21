@@ -13,16 +13,16 @@ export default function SeychellesPage() {
   ];
 
   const islands = [
-    { name: "Mahé", desc: "The largest island, home to the capital Victoria, Morne Seychellois National Park, and beautiful beaches like Beau Vallon.", image: "/images/mahe.jpg" },
+    { name: "Mahé", desc: "The largest island, home to the capital Victoria, Morne Seychellois National Park, and beautiful beaches like Beau Vallon.", image: "/images/mahe-island.jpg" },
     { name: "Praslin", desc: "Famous for Vallée de Mai (Coco de Mer forest) and Anse Lazio, one of the world's most beautiful beaches.", image: "/images/praslin.jpg" },
-    { name: "La Digue", desc: "Known for its timeless beauty, granite boulders at Anse Source d'Argent, and traditional ox-cart transport.", image: "/images/ladigue.jpg" }
+    { name: "La Digue", desc: "Known for its timeless beauty, granite boulders at Anse Source d'Argent, and traditional ox-cart transport.", image: "/images/ladigue1.webp" }
   ];
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white pt-20">
       {/* Hero */}
       <div className="relative h-[60vh] flex items-center justify-center overflow-hidden">
-        <Image src="/images/seychelles-hero.jpg" alt="Seychelles Paradise" fill className="object-cover opacity-40" priority />
+        <Image src="/images/mahe-beach.jpg" alt="Seychelles Paradise" fill className="object-cover opacity-40" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
         <div className="relative z-10 text-center px-4">
           <h1 className="text-5xl md:text-7xl font-bold mb-4">Seychelles<span className="text-yellow-400"> Paradise</span></h1>

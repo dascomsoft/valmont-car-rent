@@ -24,7 +24,7 @@ export default function ContactPage() {
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white pt-20">
       {/* Hero */}
       <div className="relative h-64 flex items-center justify-center overflow-hidden">
-        <Image src="/images/seychelles-beach.jpg" alt="Contact Valmont Car Rent" fill className="object-cover opacity-30" priority />
+        <Image src="/images/mahe1.webp" alt="Contact Valmont Car Rent" fill className="object-cover opacity-30" priority />
         <div className="relative z-10 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-2">Contact <span className="text-yellow-400">Us</span></h1>
           <p className="text-gray-300">We're here to help you explore Seychelles</p>
