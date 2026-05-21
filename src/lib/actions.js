@@ -265,33 +265,42 @@ export async function getReservations() {
       .sort({ created_at: -1 })
       .lean();
     
-    return allReservations.map(r => {
-      // Si populate a fonctionné
-      if (r.vehicleId && typeof r.vehicleId === 'object') {
-        return {
-          ...r,
-          _id: r._id.toString(),
-          id: r._id.toString(),
-          vehicle: {
-            _id: r.vehicleId._id.toString(),
-            id: r.vehicleId._id.toString(),
-            marque: r.vehicleId.marque || 'Unknown',
-            modele: r.vehicleId.modele || 'Vehicle',
-            prix: r.vehicleId.prix || 0,
-          },
-          vehicle_id: r.vehicleId._id.toString(),
-        };
-      }
-      
-      // Fallback si populate n'a pas fonctionné
-      return {
-        ...r,
-        _id: r._id.toString(),
-        id: r._id.toString(),
-        vehicle: null,
-        vehicle_id: r.vehicleId?.toString() || null,
-      };
-    });
+ return allReservations.map(r => {
+  const serialized = {
+    _id: r._id.toString(),
+    id: r._id.toString(),
+    customer_name: r.customer_name || '',
+    customer_email: r.customer_email || '',
+    customer_phone: r.customer_phone || '',
+    pickup_location: r.pickup_location || '',
+    dropoff_location: r.dropoff_location || '',
+    pickup_date: r.pickup_date || '',
+    pickup_time: r.pickup_time || '',
+    return_date: r.return_date || '',
+    return_time: r.return_time || '',
+    total_price: r.total_price || 0,
+    status: r.status || 'pending',
+    payment_status: r.payment_status || 'unpaid',
+    notes: r.notes || '',
+    created_at: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+  };
+  
+  if (r.vehicleId && typeof r.vehicleId === 'object') {
+    serialized.vehicle = {
+      _id: r.vehicleId._id.toString(),
+      id: r.vehicleId._id.toString(),
+      marque: r.vehicleId.marque || 'Unknown',
+      modele: r.vehicleId.modele || 'Vehicle',
+      prix: r.vehicleId.prix || 0,
+    };
+    serialized.vehicle_id = r.vehicleId._id.toString();
+  } else {
+    serialized.vehicle = null;
+    serialized.vehicle_id = r.vehicleId?.toString() || null;
+  }
+  
+  return serialized;
+});
   } catch (error) {
     console.error('Erreur getReservations:', error);
     return [];

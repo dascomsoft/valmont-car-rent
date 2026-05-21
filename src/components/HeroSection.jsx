@@ -327,7 +327,7 @@ export default function HeroSection() {
       {/* Background image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/carjordyno.1.jpg"
+          src="/images/main.jpg"
           alt="Valmont Car Rent Seychelles"
           fill
           className="object-cover opacity-50"
