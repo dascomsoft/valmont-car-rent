@@ -357,6 +357,7 @@ async function generatePaymentLink({ reservationId, totalPrice, vehicleName, cus
     metadata: {
       reservation_id: reservationId,
       customer_name: customerName,
+      customer_email: customerEmail,
       vehicle_name: vehicleName,
     },
   });
