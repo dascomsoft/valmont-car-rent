@@ -18,14 +18,14 @@
 // // Composant principal des résultats
 // async function ResultsList({ searchParams }) {
 //   const params = await searchParams;
-  
+
 //   const pickupLocation = params?.pickup_location;
 //   const dropoffLocation = params?.dropoff_location;
 //   const pickupDate = params?.pickup_date;
 //   const pickupTime = params?.pickup_time;
 //   const returnDate = params?.return_date;
 //   const returnTime = params?.return_time;
-  
+
 //   if (!pickupDate || !returnDate || !pickupTime || !returnTime) {
 //     return (
 //       <div className="text-center py-16">
@@ -37,17 +37,17 @@
 //       </div>
 //     );
 //   }
-  
+
 //   const allVehicles = await getVehicles();
 //   const unavailableMap = await getVehiclesAvailability(pickupDate);
-  
+
 //   // Filtrer les véhicules disponibles
 //   const availableVehicles = allVehicles.filter(vehicle => !unavailableMap.has(vehicle.id));
-  
+
 //   const start = new Date(pickupDate);
 //   const end = new Date(returnDate);
 //   const numberOfDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) || 1;
-  
+
 //   if (availableVehicles.length === 0) {
 //     return (
 //       <div className="text-center py-16">
@@ -59,7 +59,7 @@
 //       </div>
 //     );
 //   }
-  
+
 //   return (
 //     <div>
 //       {/* Récapitulatif de la recherche */}
@@ -97,14 +97,14 @@
 //           </div>
 //         </div>
 //       </div>
-      
+
 //       {/* Liste des véhicules */}
 //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 //         {availableVehicles.map((vehicle) => {
 //           const totalPrice = numberOfDays * vehicle.prix;
 //           // Déterminer la source de l'image (priorité à image_data puis image_url)
 //           const imageSrc = vehicle.image_data || vehicle.image_url || '/images/placeholder-car.jpg';
-          
+
 //           return (
 //             <div key={vehicle.id} className="bg-gray-800/90 border border-gray-700 rounded-xl overflow-hidden hover:border-yellow-400/40 transition-all duration-300 hover:shadow-xl hover:shadow-yellow-400/10">
 //               <div className="relative h-48 w-full bg-gray-700">
@@ -141,7 +141,7 @@
 //                   </div>
 //                   <div className="text-xs text-gray-500">{vehicle.prix}$ / day</div>
 //                 </div>
-                
+
 //                 <form action="/booking/customer" method="GET" className="mt-4">
 //                   <input type="hidden" name="vehicle_id" value={vehicle.id} />
 //                   <input type="hidden" name="vehicle_marque" value={vehicle.marque} />
@@ -159,7 +159,7 @@
 //                     Select this vehicle
 //                   </button>
 //                 </form>
-                
+
 //                 {/* Alternative: Book on WhatsApp directement */}
 //                 <a
 //                   href={`https://wa.me/2481234567?text=${encodeURIComponent(`Hello, I'm interested in ${vehicle.marque} ${vehicle.modele} from ${pickupDate} to ${returnDate}. Total: ${totalPrice}$. Pickup: ${pickupLocation}.`)}`}
@@ -491,27 +491,27 @@ async function ResultsList({ searchParams }) {
 
                 <div className="mt-6 flex flex-col gap-3">
                   {/* VIEW DETAILS BUTTON - LIEN VERS LA PAGE DE DÉTAIL */}
-           <Link
-            href={{
-              pathname: `/vehicle/${vehicle.id}`,
-              query: {
-                pickup_location: pickupLocation,
-                dropoff_location: dropoffLocation,
-                pickup_date: pickupDate,
-                pickup_time: pickupTime,
-                return_date: returnDate,
-                return_time: returnTime,
-                number_of_days: numberOfDays,
-                total_price: totalPrice,
-              }
-            }}
-            className="w-full flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-2xl transition"
-          >
-            <FaEye className="w-4 h-4" />
-            View Details
-          </Link>
+                  <Link
+                    href={{
+                      pathname: `/vehicle/${vehicle.id}`,
+                      query: {
+                        pickup_location: pickupLocation,
+                        dropoff_location: dropoffLocation,
+                        pickup_date: pickupDate,
+                        pickup_time: pickupTime,
+                        return_date: returnDate,
+                        return_time: returnTime,
+                        number_of_days: numberOfDays,
+                        total_price: totalPrice,
+                      }
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-2xl transition"
+                  >
+                    <FaEye className="w-4 h-4" />
+                    View Details
+                  </Link>
 
-               {/* WHATSAPP BUTTON - SANS onClick (supprimé) */}
+                  {/* WHATSAPP BUTTON - SANS onClick (supprimé) */}
                   <a
                     href={`https://wa.me/2481234567?text=${encodeURIComponent(
                       `Hello, I'm interested in ${vehicle.marque} ${vehicle.modele} from ${pickupDate} to ${returnDate}. Total: ${totalPrice}$. Pickup: ${pickupLocation}.`

@@ -373,7 +373,7 @@ export default function AdminHeader() {
           
           {/* Logo */}
           <Link href="/admin/dashboard" className="flex items-center gap-3 group">
-            <div className="relative w-32 h-32 md:w-20 md:h-20 overflow-hidden rounded-full">
+            <div className="relative w-36 h-36 md:w-10 md:h-10 overflow-hidden rounded-full">
               <Image
                 src="/images/valmontlogo.png"
                 alt="Valmont Car Rent Logo"
